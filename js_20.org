@@ -1,0 +1,155 @@
+#+TITLE: JS lec-20
+
+* 创建属性并指定特性
+
+** 添加属性与创建属性
+*添加属性* 和 *创建属性* 的四大特性是不一样的:
+
+1. 通过对象添加属性(对象字面量/构造函数/Object.create), 四大默认都是 ~true~
+2. 通过 ~Object.defineProperty~ 来定义属性的时候, 四大默认都是 ~false~.
+
+回忆"四大":
+
+| 1 | enumerable   | 可以遍历     |
+| 2 | configurable | 可以删除     |
+| 3 | writable     | 可以修改     |
+| 4 | value        | 值           |
+
+
+| 1 | 获取自身属性           | ~Object.getOwnPropertyNames(obj)~ |
+| 2 | 获取自身可遍历属性     | ~Object.keys(obj)~                |
+| 3 | 判断某个属性是否可枚举 | ~obj.isEnumrable('attr')~         |
+
+
+#+NAME: 属性的"四大"及其对应的作用
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 创建对象字面量 */
+  var obj={};
+
+  /* 添加属性: configurable */
+  obj.x = 1;
+  1
+  obj.y = 3;
+  3
+  /* 更改属性: writable */
+  obj.x = 11
+  11
+  obj.y = 33;
+  33
+  /* 删除属性: configurable */
+  delete obj.x
+  true
+  /* 遍历属性: enumerable */
+  for(i in obj){console.log(i)}
+  //VM7082:1 y
+  //VM7082:1 z
+
+  Object.keys(obj) //["y"]
+
+#+END_SRC
+
+** 创建属性指定特性
+
+通过 ~Object.defineProperty(obj, attr, 4featuresOfAttr)~ 可以更细节的控制某个已
+存在的对象的属性的特性.
+
+1. 通过对象添加属性(对象字面量/构造函数/Object.create), 四大默认都是 ~true~
+2. 通过 ~Object.defineProperty~ 来定义属性的时候, *四大默认都是 ~false~ *.
+
+#+NAME: 创建属性指定特性value
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 创建对象 */
+  var obj={};
+  /* 为对象创建属性, 没有声明的特征,默认是 false */
+  Object.defineProperty(obj, 'xx', {
+      value:12,
+      // writable: ___,
+      // enumerable: ___,
+      // configurable: ___
+  })
+
+  obj.xx // 12
+  obj.xx = 3 // 尝试修改属性, writable
+  obj // 重新打印对象,  {y: 33, xx: 12}
+  delete obj.xx // 尝试删除属性, configurable
+  obj // 重新打印对象,  {y: 33, xx: 12}
+  for(i in obj){console.log(i)} // 尝试遍历(查)属性
+  // VM7362:1 y, 并没有显示属性 'xx'
+#+END_SRC
+
+#+NAME: 创建属性指定特性
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  Object.defineProperty(obj, 'y', {
+      value:56,
+      writable:true,
+      enumerable: false,
+      configurable: false})
+
+  obj.y = 3 // 尝试修改
+  obj // {y: 3, xx: 12}
+  for(i in obj){console.log(i)} // 因为 'y' 和 'xx' 都是 'enumerable:false', 所以不可遍历.
+  delete obj.y // 尝试删除
+  obj // {y: 3, xx: 12}
+
+  Object.keys(obj); // 返回空, .keys() 要求[可遍历的自身属性]
+  Object.getOwnPropertyNames(obj); // 返回 ["y", "xx"]
+#+END_SRC
+
+
+~configurable~ 不但决定了该属性不可删除
+
+#+NAME: 创建属性指定其configurable属性
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  Object.defineProperty(obj, 'z', {
+      value: 'this is a test',
+      writable: true,
+      enumerable: true,
+      configurable: false})
+  {yy: 56, z: "this is a test", y: 3, xx: 12}
+  delete obj.z // fasle, 不可修改
+
+  Object.defineProperty(obj, 'zz', {
+      value: 'this is a test',
+      writable: true,
+      enumerable: true,
+      configurable: true})
+  {yy: 56, z: "this is a test", zz: "this is a test", y: 3, xx: 12}
+  delete obj.zz // true, 可以删除
+#+END_SRC
+
+~configurable~ 还决定了该属性的特性不可更改.
+
+#+NAME: 创建属性指定其configurable属性
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  Object.defineProperty(obj, 'z', {
+      value: 'this is a test',
+      writable: true,
+      enumerable: true,
+      configurable: false})
+  {yy: 56, z: "this is a test", y: 3, xx: 12}
+  delete obj.z // fasle, 不可修改
+
+  Object.defineProperty(obj, 'z', {
+      value: 'this is a test',
+      writable: true,
+      enumerable: true,
+      configurable: true}) // error, 'z' can not be redefined.
+#+END_SRC
+
+
+[注意]: 通过 ~get~ 来完成类似 ~value~ 的作用.
+
+#+NAME: 通过get函数完成value特性的功能
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  Object.defineProperty(obj,'attr',{
+      get : function(){
+          return 123;
+      }
+  }) // {yy: 56, z: "this is a test", zz: "this is a test", y: 3, xx: 12, …}
+  obj.attr // 123
+
+  Object.defineProperty(obj, 'attr2', {
+      value: 123}) // {yy: 56, z: "this is a test", zz: "this is a test", y: 3, xx: 12, …}
+
+  obj.attr2 // 123
+#+END_SRC

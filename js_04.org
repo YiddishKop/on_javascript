@@ -1,0 +1,105 @@
+#+TITLE: JS lec-4
+
+* 数据类型转换
+
+** 隐式转换
+   根据上下文语境, 系统自动为你转换
+*** convert to bool
+
+    这种转换一般发生在 ~if(){ HERE }else{}~ 表达式中, *原来判断条件应该填入布尔
+    值的,但是你填入的如下类型, 则如下类型就会发生转换*.
+
+
+    | 原始值                 | 转换值 |
+    |------------------------+--------|
+    | undefined              | false  |
+    | null                   | false  |
+    | 数值型 0 or 0.0 or NaN | false  |
+    | 字符串长度为 0         | false  |
+    | 其他对象               | true   |
+    | undefined              | NaN    |
+
+
+    | 原始值   | 转换值 |
+    |----------+--------|
+    | 其他对象 | true   |
+    |          |        |
+
+#+NAME: 哪些值会隐世转换成 false
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript">
+     /*
+        if(exp) {
+          code if exp is ture;
+        }else{
+          code if exp is ture;
+        }
+      */
+
+     /* 以下统统转换成 false; 其余的全部转换成 true */
+     /* var a;         // type of a is undefined */
+     /* var a=null;    // type of a is object */
+     /* var a=0;       // type of a is number */
+     /* var a=0.0;     // type of a is number */
+     /* var a=0/0;     // type of a is number */
+     var a="";      // type of a is string
+     alert(typeof a);
+     if (a){ // 此处, undefined -> false
+       alert("真")
+     }else{
+       alert("假")
+     }
+    </script>
+  </head>
+  <body>
+    <h1>隐式转换</h1>
+  </body>
+</html>
+
+#+END_SRC
+*** convert to numerical
+
+    这种转换一般发生在 ~HERE+-/*number~ 表达式中, *应该填入数字类型的,但是你填入的
+    如下类型, 则如下类型就会发生转换*. ~+~
+
+
+    | 原始值               | 转换值 |
+    |----------------------+--------|
+    | undefined            |    NaN |
+    | null                 |      0 |
+    | true                 |      1 |
+    | false                |      0 |
+    | 内容(字符串)为数字   |   数字 |
+    | 内容(字符串)不为数字 |    NaN |
+
+
+
+    | 原始值       | 转换值 |
+    |--------------+--------|
+    | 其他对象     |    NaN |
+*** convert to string
+
+    一般出现在 ~document.write(HERE)~, *要求函数参数为字符串,但是输入如下值,则会发生转换.*
+
+
+    | 原始值 | 转换值                     |
+    |--------+----------------------------|
+    | null   | 'null'                     |
+    | true   | 'true'                     |
+    | false  | 'false'                    |
+    | 数值型 | NaN, 0或者与之对应的字符串 |
+
+
+    | 原始值   | 转换值                                                                |
+    |----------+-----------------------------------------------------------------------|
+    | 其他对象 | 如果这个对象存在则转换为 ~toString()~ 方法的值;否则转换为 'undefined' |
+
+** 显式转换
+*** convert to bool
+*** convert to numerical
+*** convert to string

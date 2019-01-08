@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>事件</h1>
+    <input type="button" value="test1" onclick="alert('hello yuanlong')" />
+    <input type="button" name="" value="test2" onclick="test()" />
+    <input type="button" name="" value="test3" id="btn1" />
+    <input type="button" name="" value="test4" id="btn3" />
+    <input type="button" name="" value="test6" id="btn4" />
+
+    <script type="text/javascript">
+     var btn1 = document.getElementById('btn1'); // 通过 id 先找到这个元素
+     btn1.onclick=function(){                    // 然后给他添加 onclick 事件
+       alert('btn1 click');
+     }
+     function test(){
+       alert('this is a test');
+      }
+
+
+     var bnt3=document.getElementById('btn3');
+     var count = 0;
+     btn3.onclick=function(){
+       alert(count++);
+       if(count==3){
+         btn3.onclick = null; // 相当于关闭该事件 --- 即鼠标点击无程序执行.
+       }
+     }
+
+     // 脚本模型事件的弊端: 如果我想给 btn4 添加多个事件
+     // 这种情况只会有最后一个 onclick 事件绑定函数执行. 前两个被覆盖.
+     // 所以多个事件处理程序绑在一个 HTML 元素上, 是无法实现的.
+     var btn4 = document.getElementById('btn4');
+     btn4.onclick = function(){
+       alert('a');
+     }
+     btn4.onclick = function(){
+       alert('b');
+     }
+     btn4.onclick = function(){
+       alert('c');
+     }
+    </script>
+  </body>
+</html>

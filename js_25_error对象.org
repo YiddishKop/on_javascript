@@ -1,0 +1,214 @@
+#+TITLE: JS lec-25
+
+
+* Error 处理
+** 定义
+*语法:*
+
+~new Error([message[, fileName[, lineNumber]]])~
+
+*参数:*
+
+1. message 错误描述;
+2. fileName 创建 Error 对象的 fileName 属性的值.默认是包含异常代码的文件名;
+3. lineNumber 创建 Error 对象的 lineNumber 属性的值.默认是构造Error对象的行数;
+
+*描述:*
+
+当代码运行时的发生错误, 会创建新的 Error 对象, 并将其 *自动* 抛出. 也可以通过
+~throw new Error()~ *手动* 抛出.
+
+*Error 类型:*
+
+1. EvalError: 创建一个 error 实例, 表示错误的原因: 与 eval() 有关;
+2. InternalError: 创建一个代表 JS 引擎内部错误的异常抛出的实例,如:'递归太多';
+3. RangeError: 数值变量或参数超出其有效范围.
+4. ReferenceError: 无效引用.
+5. SyntaxError: eval() 在解析代码的过程中发生的语法错误
+6. TypeError: 变量或参数不属于有效类型.
+7. URIError: 给 encodeURI() 或 decodeURI() 传递的参数无效.
+
+** 捕获
+   #+BEGIN_EXAMPLE
+   try{
+      ... // 被监测语句
+   }catch(e){
+      ... // 出现异常才进入, 处理异常, 一般就是打印出来
+   }finally{
+      ... // 不论出现异常与否都进入, 一般用来善后
+   }
+   ... // 继续执行, 程序不会中止
+   #+END_EXAMPLE
+
+#+NAME: tryCatchFinally用法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  try{       // 有错进入 catch, 有错没错都进入 finally
+      notExists();
+  }catch(e){ // 只有有错才进入
+      console.log('hello, not define');
+  }finally{  // 有错没错都进入
+      alert('hello, see you again');
+  }
+#+END_SRC
+
+** 代码实例
+
+#+NAME: ERROR处理
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* Error 对象 */
+  notExists();
+  /* 由于上面的 notExists() 函数没有定义,所以 JS 引擎检测到并自动抛出如下异常 */
+  /* VM921:1 Uncaught ReferenceError: notExists is not defined
+       at <anonymous>:1:1
+     (anonymous) @ VM921:1 */
+
+
+  /* 监测, 捕获并处理异常 */
+  try{
+      notExists();
+  }catch(e){
+      console.log('hello, not define');
+  } // VM1011:4 hello, not define
+
+
+  /* 监测, 捕获并处理异常, 并善后 */
+  try{       // 有错进入 catch, 有错没错都进入 finally
+      notExists();
+  }catch(e){ // 只有有错才进入
+      console.log('hello, not define');
+  }finally{  // 有错没错都进入
+      alert('hello world');
+  }
+
+
+  /* 手动抛出异常 throw new Error(); 方便编写自己想要的异常信息 */
+  try{
+      var n = 2;
+      if(n==0){
+          throw new Error('0 不能当做除数');
+      }else{
+          console.log(4/n);
+      }
+  }catch(e){
+      console.log(e.name + ':' + e.message);
+  }finally{
+      console.log('我总是被调用')
+  }
+  // VM1592:6 2
+  // VM1592:11 我总是被调用
+
+
+  /* 通过 e instanceof ErrorType 对不同的错误类型做不同的处理; */
+  undefined
+  try{
+      notExists();
+  }catch(e){
+      if(e instanceof EvalError){
+          console.log('Eval错误' + e.message);
+      }else if(e instanceof RangeError){
+          console.log('Range错误' + e.message);
+      }else if(e instanceof ReferenceError){ console.log
+  }finally{
+      console.log('我总是执行');
+  }
+  VM1982:9 Uncaught SyntaxError: Unexpected token finally
+  try{
+      notExists();
+  }catch(e){
+      if(e instanceof EvalError){
+          console.log('Eval错误' + e.message);
+      }else if(e instanceof RangeError){
+          console.log('Range错误' + e.message);
+      }else if(e instanceof ReferenceError){
+          console.log('Reference错误' + e.message);
+      }
+  }finally{
+      console.log('我总是执行');
+  }
+  // VM2159:8 Reference错误notExists is not defined
+  // VM2159:10 我总是执行
+
+
+  /* 自定义错误处理器 */
+  function MyError(msg){
+      this.name = '这是我自定义的错误处理器';
+      this.message = msg||'默认自定义的错误信息';    //这种格式在js中非常常见,意思为:
+                                                 //如果你给我传值了,我就用你传的;
+                                                 //如果没传,就是用我自己这里写的.
+  }
+
+  /*
+  ,* 注册自定义 Error 对象的原型
+  ,*/
+  MyError.prototype = Object.create(Error.prototype);// 通过构造函数创建的对象,其
+                                                     // prototype 就是构造函数的
+                                                     // prototype, 但是我们需要的
+                                                     // 是 ERROR 对象,所以这里应该
+                                                     // '认祖归宗',重新定义其
+                                                     // prototype --- 也就是把
+                                                     // Error 类的 prototype 的对
+                                                     // 象传递给 MyError 的
+                                                     // prototype 属性
+
+  /*
+   ,* 注册自定义 Error 对象原型的构造函数
+   ,*/
+  MyError.prototype.constructor = MyError; // 重新定义该 prototype 类型的构造函数
+                                           // 为 MyError 函数.
+
+  /*
+   ,* 使用自定义 Error 对象: throw new MyError()
+   ,*/
+  try {
+      throw new MyError(); // 不传 message 参数的话,只用自定义 Error 对象时指定的.
+  }catch(e){
+      console.log(e.name + ':' + e.message);
+  }
+  // VM3107:4 这是我自定义的错误处理器:默认自定义的错误信息
+
+  function MyError(msg){
+      this.name = '错误名字';
+      this.message = msg||'默认自定义的错误信息';//这种格式在js中非常常见,意思为:如果你给我传值了,我就用你传的;如果没传,就是用我自己这里写的.
+  }
+
+  try {
+      throw new MyError('测试自定义的错误信息'); // 传 message 参数的话,使用传递的.
+  }catch(e){
+      console.log(e.name + ':' + e.message);
+  }
+  // VM3137:4 错误名字:默认自定义的错误信息
+
+#+END_SRC
+* 传递对象和对象比较
+** 传递对象
+   - 对象传递是通过引用进行传递的;
+   - 在引用上做的改动会影响原对象
+** 对象比较
+   - 当两个对象做比较的时候, 只有当两个引用指向同一个对象时为 true, 否则为
+     false;
+
+** 代码示例
+
+#+NAME: 传递对象和对象比较
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // 对象比较
+  var o1 = {x:1};
+  var o2 = {x:1};
+  o1 == o2 ; // false
+  o1 === o2; // false
+
+  var o3 = {x:1};
+  var o4 = o3;
+  o4.x = 123;
+  o3.x;      // 123
+
+  function f(o){
+      o.x = 55;
+  }
+
+  f(o3);
+  o3;   // {x: 55}
+  o4.x; // 55
+  o3==o4; // true
+  o3===o4;// true
+#+END_SRC

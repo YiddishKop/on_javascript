@@ -1,0 +1,30 @@
+#+TITLE: JS lec-23
+
+* 对象的三个特性(一)
+** 3. 对象的扩展标记(extensible flag)
+
+* 工具类对象
+
+** Date 对象
+1. ~new Date()~
+2. ~new Date(value)~: value 代表 1970年1月1日00:00:00 经过的毫秒数.
+3. ~new Date(dateString)~: dateString 表示日期的字符串值. 该字符串应该能被 Date.parse() 方法识别
+4. ~new Date(year, month, day, hour, minite, second, milisecond);~
+
+#+NAME: 日期Date
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var d = new Date(); // 如果不传参数,则默认输出本地时间
+  d // Fri Nov 16 2018 22:51:09 GMT+0800 (China Standard Time)
+  var d = new Date(12341212);
+  d // Thu Jan 01 1970 11:25:41 GMT+0800 (China Standard Time)
+  var d = new Date(2018, 9, 10);
+  d // Wed Oct 10 2018 00:00:00 GMT+0800 (China Standard Time)
+  var d = new Date(18, 9);
+  d // Tue Oct 01 1918 00:00:00 GMT+0800 (China Standard Time)
+#+END_SRC
+
+#+NAME: 日期解析
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+略
+#+END_SRC
+

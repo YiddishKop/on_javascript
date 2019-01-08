@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>事件</h1>
+    <input type="button" name="" value="test1" id='btn1' />
+    <script type="text/javascript">
+     var btn1=document.getElementById('btn1');
+     btn1.onclick = function(e){
+       var e =e||window.event;  // 跨浏览器兼容
+       alert(e);                // [object MouseEvent]
+       alert(e.type);           // click
+     }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,112 @@
+#+TITLE: JS lec-19
+
+* 对象属性
+
+上节两个函数,用于检测属性是否是对象的:
+1. [X]  ~'属性名' in 对象名~
+2. [X]  ~对象名.hasOwnProperty('属性名')~
+3. [ ] 通过函数 ~Object.getOwnPropertyNames(对象名)~ 来获取所有 *自己的* (非原
+    型链) 的属性名.
+4. [ ] 通过 ~Object.keys(对象名)~ 来获取所有 *可枚举* 的属性名.
+
+
+** 数据属性
+
+数据属性包含一个数据值的位置, 在这个位置可以读取和写入值;
+
+*** 属性的四大特性
+
+[注意]: 属性的四大特性,是对该属性的 *可操作性的描述* --- 也就是是否可 ~存值/增/删/改/查(遍历)~
+
+
+ 1. *writable* : 表示属性值是否可以 *修改*, 默认 ~true~
+ 2. *Enumeralbe* : 表示能否通过 ~for..in..~ 循环 *遍历* 属性, 也就是 *属性是否
+    可枚举*, 直接在对象上定义的属性默认值是 ~true~
+    1. 通过函数 ~对象名.propertyIsEnumerable('属性名')~ 来判断该属性是否可枚举.
+ 3. *configuable* : 表示是否通过 ~delete~ *删除* 属性从而重新定义属性, *能否修改属性
+    的特性*, 或者能否把属性修改为访问器属性. 直接在对象上定义的属性默认值是 ~true~
+ 4. *value* : 包含这个属性值的数据, 写入属性值的时候把新值保存在这个位置. 默认值
+    为 ~undefined~
+
+#+BEGIN_QUOTE
+[注意]: ~configuable~ 这个特性非常重要
+1. 他不但决定了 *该属性是否可删除*
+2. 他还直接决定了 *该属性的特性是否可以修改*
+#+END_QUOTE
+
+
+#+BEGIN_EXAMPLE
+                       is true
+configuable of attr  ----------> attr can be delete
+       |
+       |               is true
+       +-----------------------> writable/enumerable/value/configuable of attr can be modified (to 'true' of 'false')
+#+END_EXAMPLE
+
+#+NAME: 判断是否可枚举
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var obj = {x:1, y:2};
+'x' in obj; //true
+obj.hasOwnProperty('x'); //true
+obj.hasOwnProperty('toString'); //false
+obj.hasOwnProperty(toString()); //false
+'toString' in obj; true
+obj.propertyIsEnumerable('x'); //true
+#+END_SRC
+
+
+#+NAME: 通过undefined判断属性是否是存在于原型链中
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+test // Test {f: 8}
+test.f == undefined// false, f 存在于原型链, 所以不为 undefined
+test.toString == undefined// false, toString 存在于原型链, 所以不为 undefined.
+#+END_SRC
+
+#+NAME: 通过Object.getOwnPropertyNames(对象名)获取所有自身定义属性名
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+function Test2(x,y){this.x = x; this.y = y; };
+var test2 = new Test2();
+test2.x = 3;
+test2.y = 'hello, js';
+Object.getOwnPropertyNames(test2)// ["x", "y"]
+#+END_SRC
+
+#+NAME: 通过Object.keys(对象名)获取所有可枚举属性名
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+function Test2(x,y){this.x = x; this.y = y; };
+var test2 = new Test2();
+test2.x = 3;
+test2.y = 'hello, js';
+Object.keys(test2) // ["x", "y"]
+#+END_SRC
+
+#+NAME: 如何返回所有属性(包括自身定义和原型链中的属性)
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function Test1(){};
+  var test1 = new Test1();
+
+  test1._proto_.z = 6; //添加属性 'z' 给 Test1 的原型(也就是 Object)
+
+  function Test2(x,y){this.x = x; this.y = y; };
+  var test2 = new Test2();
+  test2.x = 3;
+  test2.y = 'hello, js';
+
+  for(i in test2){console.log(i)};
+  // VM6780:1 x
+  // VM6780:1 y
+  // VM6780:1 z <--- 连同原型中的属性也一并输出
+#+END_SRC
+
+[注意]
+
+这节课继续学习相关的函数, *属性是否可枚举*, 属性可枚举是 ~hasOwnProperty~ 的增强
+版, 只有检测到:
+1. 属性是自身的(非原型链属性)
+2. 属性可枚举
+两者同时满足, *属性是否课枚举* 函数才会返回 ~true~
+
+** 存取器属性
+
+1. get
+2. set

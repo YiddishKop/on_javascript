@@ -1,0 +1,516 @@
+#+TITLE: JS lec-26
+
+* 数组对象概念
+定义
+
+数组是值的有序集合; JS 中数组是 *无类型* 的,数组元素可以是 *任意类型的混合*.
+
+创建
+
+JS中的数组是动态的, 创建时 *无需指定数组大小*, 满时也 *无需手动分配空间*.
+
+1. 字面量形式
+
+   1. 空数组: var arr = [];
+
+   2. 带有元素的数组: var arr = [1,2,3];
+
+   3. 数组值可以是任意类型: var arr = [1, 'a', 2.3, true, null, undefined, [1,2,3], {name:'king'}]
+
+   4. 省略数组中的某个值, 默认值为 Undefined: var arr = [1,,3]; 其等同于 [1,undefined,3].
+
+   5. 注意: var arr = [,,];  arr 中有 *2* 个元素, *因为在 JS 中 '()', '{}', '[]' 中的最后一个逗号经常忽略不计*.
+
+2. 通过构造函数 Array() 创建数组
+
+   1. 调用时没有参数: var arr = new Array(); 其为空数组,等同于 arr = [];
+
+   2. 调用时传递一个参数: var arr = new Array(5); 参数代表数组长度, 相当于 arr = [,,,,,];
+
+   3. 超过两个参数: var arr = new Array(1,2,3,true,'king'); 相当于 arr = [1,2,3,true,'king'];
+
+* 使用
+
+1. 根据下标找到对应的值
+2. 向数组中添加元素
+   1. arr[下标]=值; // JS 可以超出数组下标进行索引赋值, 因自动分配不会报错.
+   2. arr.push(值,...); 数组尾添加元素.
+   3. arr.shift(值,...); 数组头添加元素.
+3. 读取数组中元素
+   1. arr[下标];
+4. 修改数组中元素
+   1. arr[下标]=值;
+5. 删除数组中元素
+   1. delete arr[下标]; 注意, *通过delete删掉数组元素,不改变数组长度*, delete 只
+      是用 undefined 赋值那个索引位置, 相当于 ~arr[下标]=undefined~.
+   2. arr.pop(); 删除数组尾元素;
+   3. arr.unshift(); 删除数组头元素;
+   4. 可以通过length属性, 删除数组后面的
+
+
+[注意:] JS 中 *对象可以按照数组的语法格式修改和添加属性* , 具体来说就是把数组的
+   *索引值* 转换成字符串当做对象的 *属性*. 但两者不同的是: 数组有 length 属性,
+   对象没有. 数组是对象, 数组可以看成是更 *特化* 的对象, 其在对象基础上添加的 *
+   特有规则* 就是:
+   1. 数组自动维护属性 length 的增减;
+   2. 数组的属性必须是非负整数;
+   3. 如果属性不是非负整数,虽可保存,但 length 不增加.
+
+
+[注意:] JS 中连续数组称为稠密数组; 不连续数组称为稀疏数组;
+
+[注意:] JS 中可以通过 ~arr.length = 3~ *定死* 数组长度, 定死之后数组的长度 *永远
+不变* --- 相当于对原来的数组进行截取或者补全(补全Undefined).
+
+[注意:] 由于数组也是对象,也就有属性以及属性的四大特性(value, writable,
+enumerable, configurable), 可以通过把 ~length~ 属性的 ~writable: false~ 把数组变
+成 *定长* 数组.
+
+
+
+
+#+NAME: 数组与对象
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // -------------------------------
+  var arr = {};
+  arr[1] = 'a'; arr[2] = 'b';
+  arr; // {1:'a', 2:'b'}
+  arr.length; // undefined
+  // -------------------------------
+  var arr = [];
+  arr[1] = 'a'; arr[2] = 'b';
+  arr; // {1:'a', 2:'b'}
+  arr.length; // 3
+#+END_SRC
+
+
+#+NAME: length不增加的情况
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var arr = [];
+arr[1] = 'a';
+arr[2] = 'b';
+arr;        // [empty, "a", "b"]
+arr.length; // 3
+arr[1.2]=3;
+arr;        // [empty, "a", "b", 1.2: 3]
+arr.length; // 3, 未增加
+arr['a']='a'
+arr;        // [empty, "a", "b", 1.2: 3, a: "a"]
+arr.length; // 3, 未增加
+arr[undefined]='good'
+arr;        // [empty, "a", "b", 1.2: 3, a: "a", undefined: "good"]
+arr.length; // 3, 未增加
+#+END_SRC
+
+
+- 不连续索引的数组 --- 稀疏数组;
+- 连续索引的数组 --- 稠密数组;
+- 由于对连续数组做了专门的优化,所以稀疏数组比稠密数组要慢;
+
+#+NAME: JS支持越界索引
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var arr = new Array(5);
+  arr = [1,2,'king',{x:1,y:2},[4,5,6]];
+  arr[66] = 3423;
+  arr.length; // 67
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+arr:
+
+|---+---+--------+-----------+---------+-----------+-----------+-----+-----------+------|
+| 0 | 1 |      2 |         3 |       4 |         5 |         6 | ... |        65 |   66 |
+|---+---+--------+-----------+---------+-----------+-----------+-----+-----------+------|
+| 1 | 2 | 'king' | {x:1,y:2} | [4,5,6] | undefined | undefined | ... | undefined | 3423 |
+|---+---+--------+-----------+---------+-----------+-----------+-----+-----------+------|
+#+END_EXAMPLE
+
+
+
+#+NAME: 规定数组长度
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var arr2 = [1,2,3,4,5,6];
+  arr2;            // [1, 2, 3, 4, 5, 6]
+  arr2.length;     // 6
+  arr2.length = 3; // 定死数组长度之后, 相当于自动做截取和补全
+  arr2.length;     // 3
+  arr2;            // [1, 2, 3]
+#+END_SRC
+
+
+#+NAME: 规定数组长度
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var arr2 = [1,2,3,4,5,6];
+  arr2;            // [1, 2, 3, 4, 5, 6]
+  arr2.length;     // 6
+  arr2.length = 9; // 定死数组长度之后, 相当于自动做截取和补全
+  arr2.length;     // 9
+  arr2;            // [1, 2, 3, 4, 5, 6, undefined, undefined, undefined]
+#+END_SRC
+
+#+NAME: 变成定长数组
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var arr2 = [1,2,3,4,5,6];
+  arr2.length;      // 6
+  /*
+   ,* 下面修改 arr2 的 length 的 writable 属性为 false
+   ,*/
+  Object.defineProperty(arr2, 'length', {writable:false});
+  arr2.length = 23; // 23, 虽然没有报错, 但是并没有更改 length, 看下面一行
+  arr2.length;      // 6, 数组长度仍然是 6.
+#+END_SRC
+
+* 遍历
+
+
+1. ~for~ 循环遍历下标连续的数组;
+2. ~for(...in...)~ 遍历数组; 这种方法遍历数组,使用的是把数组当做对象来看待(for-in 本身就
+   是用来遍历对象属性的), ~for(i in arr)~ 中 ~i~ 存放的是 arr 的 *索引* (把数组看
+   做对象时,索引对应的是对象属性), 这一点 *与 python 非常不同*:
+   - python: ~for i in arr~ i 中取出的是 *数组元素*;
+   - javascript: ~for(i in arr)~ i 中取出的是 *数组索引*;
+
+   并且 for(...in...) 会直接忽略掉内容为 undefined 位, 所以他可以用来遍历稀疏数组(非连续数组).
+
+   再并且 for(...in...) 不但会读出自身属性,还会读出继承属性, 所以面对有继承属性
+   的数组,必须先进行判断(~arr.hasOwnProperty(i)~ : arr 是否拥有自身属性 i).
+
+
+3. 通过类方法 ~arr.forEach()~ 遍历数组, 语法为 ~arr.forEach(function(index[,
+   array]){函数体})~ : *意思是对数组中的每一项都执行函数function.*, 这里的
+   function 可选 3 个参数,依次为: 元素,索引,数组. 帮助你做不同的处理. 有点类
+   似 scala 中的相关函数, some feeling of functional programming.
+
+
+
+#+BEGIN_EXAMPLE
+arr:
+         |---+---+--------+-----------+---------+-----------+-----------+-----+-----------+------|
+     +---| 0 | 1 |      2 |         3 |       4 |         5 |         6 | ... |        65 |   66 |
+     |   |---+---+--------+-----------+---------+-----------+-----------+-----+-----------+------|
+ +---+---| 1 | 2 | 'king' | {x:1,y:2} | [4,5,6] | undefined | undefined | ... | undefined | 3423 |
+ |   |   |---+---+--------+-----------+---------+-----------+-----------+-----+-----------+------|
+ |   |
+ |   +----------------+    |
+ +---------------+    |    |
+                 v    v    v
+function handle(ele, idx, arr){
+  console.log('arr:'+arr+'\nele:'+ele+'\nidx:'+'idx');
+}
+
+arr.forEach(handel);
+#+END_EXAMPLE
+
+
+
+
+#+NAME: 与python不同的for_in
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  arr3 // (4) [empty, 'how', 'are', 'you']
+
+  /*
+   * i 仅仅是对象属性(数组索引)
+   */
+  for(i in arr3){
+      if(arr3.hasOwnProperty(i)){
+          console.log(i)
+      }
+  };
+  // VM1581:1 1
+  // VM1581:1 2
+  // VM1581:1 3
+
+  /*
+   * arr3[i] 仅仅是对象属性值(数组索引存储内容)
+   */
+  for(i in arr3){
+      if(arr3.hasOwnProperty(i)){
+          console.log(arr3[i]);
+      }
+  }
+  // VM1608:1 'how'
+  // VM1608:1 'are'
+  // VM1608:1 'you'
+#+END_SRC
+
+#+NAME: for_in忽略掉数组undefined位
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  arr3; // (4) [empty, 'how', 'are', 'you']
+  arr3[0]; // undefined
+
+  for(i in arr3){
+      if(arr3.hasOwnProperty(i)){
+          console.log(i)
+      }
+  };
+  // 索引 0 并没有打印
+  // VM1581:1 1
+  // VM1581:1 2
+  // VM1581:1 3
+
+  for(i in arr3){
+      if(arr3.hasOwnProperty(i)){
+          console.log(arr3[i]);
+      }
+  }
+  // 索引 0 存放的 undefined 没有打印
+  // VM1608:1 'how'
+  // VM1608:1 'are'
+  // VM1608:1 'you'
+#+END_SRC
+
+
+#+NAME: arr.forEach方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var arr3 = [1,2,3,4,5,6];
+  arr3.forEach(function(x){
+      console.log(x);
+  });
+  // 1
+  // 2
+  // 3
+  // 4
+  // 5
+  // 6
+#+END_SRC
+
+#+NAME: arr.forEach()方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function handle(ele, idx, arr){
+    console.log('arr:'+arr+'\nele:'+ele+'\nidx:'+idx);
+  }
+
+  arr3.forEach(handle);
+  /*
+  arr:1,2,3,4,5,6
+  ele:1
+  idx:0
+
+  arr:1,2,3,4,5,6
+  ele:2
+  idx:1
+
+  arr:1,2,3,4,5,6
+  ele:3
+  idx:2
+
+  arr:1,2,3,4,5,6
+  ele:4
+  idx:3
+
+  arr:1,2,3,4,5,6
+  ele:5
+  idx:4
+
+  arr:1,2,3,4,5,6
+  ele:6
+  idx:5
+  */
+#+END_SRC
+
+
+* 常用方法
+
+
+| 方法                                                    | 描述                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 参数                                       | 返回值               | 注意                                    |
+|---------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+----------------------+-----------------------------------------|
+| arr.join([delimiter])                                   | 值连接成字符串                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 以指定分隔符连接,如果不指定,默认以逗号连接 | 返回连接之后的字符串 | Array.join()是 String.split()的逆向操作 |
+| arr.reverse()                                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.sort()                                              | sort 属于 in-place 操作, 会改变原始数组.                                                                                                                                                                                                                                                                                                                                                                                                                                               |                                            |                      |                                         |
+| arr.concat(value,...)                                   |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.slice(start[,end])                                  |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.splice(index, howMany[, element1[,...[,elementN]]]) |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+|---------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+----------------------+-----------------------------------------|
+| arr.push                                                |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.pop                                                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.shift                                               |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.unshift                                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+|---------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+----------------------+-----------------------------------------|
+| arr.map                                                 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.filter                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.reduce()                                            | reduce 为数组中的每一个元素依次执行回调函数, 不包括数组中被删除或从未被赋值的元素, 接受四个参数: 初始值(或上一次回调函数的值),当前元素值,当前索引,调用 reduce 的数组. 回调函数第一次执行时, previousValue 和 currentValue 可以是一个值, 如果 initialValue 在调用 reduce 时被提供, 那么第一个 previousValue 等于 initialValue, 并且 currentValue 等于数组中的第一个值;如果 initialValue未被提供, 那么 previousValue 等于数组中的第一个值, currentValue 等于数组中的第二个值. |                                            |                      |                                         |
+| arr.reduceRight()                                       | 与 reduce 方法的执行方向相反                                                                                                                                                                                                                                                                                                                                                                                                                                                |                                            |                      |                                         |
+| arr.some()                                              |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.every()                                             |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.indexOf()                                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.lastIndexOf()                                       |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.isArray()                                           |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+| arr.toString()                                          |                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |                                            |                      |                                         |
+#+TBLFM:
+
+#+NAME: 常用方法-join
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var arr = ['a','b','c','d'];
+  arr.join();
+  "a,b,c,d"
+  arr.join(',');
+  "a,b,c,d"
+  arr.join('');
+  "abcd"
+#+END_SRC
+
+#+NAME: 常用方法-reverse
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* reverse */
+  var arr = ['a','b','c','d'];
+  res = arr.reverse(); // ["d", "c", "b", "a"]
+#+END_SRC
+
+#+NAME: 常用方法-sort数字
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* sort */
+  // 可以传递自己指定的排序规则, 不指定的话默认使用 unicode
+  var arr = ['a','b','c','A','B','C'];
+  res = arr.sort()  // ["A", "B", "C", "a", "b", "c"]
+  var arr = [1,2,11,22];
+  res = arr.sort(); // [1, 11, 2, 22]
+
+  // 并非按照数值大小排序, 而是按照首字符的unicode顺序排序.
+  res = arr.sort(function(a,b){
+      return a-b;}
+  ) // ([1, 2, 11, 22]
+
+  // 从大到小
+  res = arr.sort(function(a,b){
+      return b-a;})     // [22, 11, 2, 1]
+#+END_SRC
+
+#+NAME: 常用方法-sort字符串
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // JS 中的字符比较大小
+  // 'a' > 'b'
+  // false
+  // 'a' < 'b'
+  // true
+  // 'aa' < 'b'
+  // true
+  // 'aaaaa' < 'b'
+  // true
+
+  var users = [{name:'king', age:12},
+               {name:'long', age:32},
+               {name:'xin', age:27},
+               {name:'qi', age:31},]
+
+  function sortByName(a,b){
+      if (a.name>b.name) return 1;
+      if (a.name<b.name) return -1;
+      return 0;}
+
+  users.sort(sortByName);
+  for(var i =0; i<users.length; i++){
+      console.log(users[i]["name"]);
+  }
+  // xin
+  // qi
+  // long
+  // king
+#+END_SRC
+
+#+NAME: 常用方法-concat
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // concat
+  var arr = [1,2,3];
+  res = arr.concat(4,5,6);           // [1, 2, 3, 4, 5, 6]
+  res = arr.concat([4,5,6]);         // [1, 2, 3, 4, 5, 6]
+  res = arr.concat([4,5,6],[7,8,9]); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+  res = arr.concat([11,[12,[13]]]);  // [1, 2, 3, 11, Array(2)]
+#+END_SRC
+
+#+NAME: 常用方法-slice: 只是复制出一部分
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // slice, slice 与 python 的切片行为一致: 包头不包尾.
+  undefined
+  var arr = ['a','b','c','d','e','f','g','h'];
+  res = arr.slice(0,2);  // ["a", "b"]
+  res = arr.slice(0,-1); // ["a", "b", "c", "d", "e", "f", "g"]
+  res = arr.slice(2, -3);// ["c", "d", "e"]
+  res = arr.slice(2);    // ["c", "d", "e", "f", "g", "h"]
+  // 如果 slice 只有一个参数,表示从给出的参数一直到末尾.
+  var arr = ['a','b','c','d','e','f','g','h'];
+#+END_SRC
+
+#+NAME: 常用方法-splice: 同时实现切除与填充
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // splice 属于 in-place 操作, 类似 pop 操作, 切出的元素会被从原始数组中删除
+  res = arr.splice(0,1); // ["a"]
+  arr;                   // ["b", "c", "d", "e", "f", "g", "h"]
+  res = arr.splice(0,2,"!","@","^"); // ["b", "c"]
+  arr;                               // ["!", "@", "^", "d", "e", "f", "g", "h"]
+
+  // splice(首索引,尾索引, 填充元素1, ... , 填充元素N), 也就是说 splice 与 slice不
+  // 同的地方就在于, splice 的 'p'---'padding', 你可以填充元素进去. 而且并不是 "一
+  // 坑一萝卜" 的插入,而是把要添加的元素从首索引开始,全部插进去,有多少插多少,原始
+  // 数组的元素,往后顺延.
+  var arr = ['a','b','c','d','e','f','g','h'];
+  res = arr.splice(0,2,'1','2','3','4','5') // ["a", "b"]
+#+END_SRC
+
+#+NAME: 常用方法-map
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // map
+  var arr = [1,2,3,4,5,6];
+  arr.map(function(x){return x*x;}) // [1, 4, 9, 16, 25, 36]
+  var arr = ['a!','b!','c!','d!','e'];
+  // 与正则表达式结合
+  function Trans(x){
+      return x.replace(/!/g, '@').toUpperCase();
+  }
+  res = arr.map(Trans); //["A@", "B@", "C@", "D@", "E"]
+#+END_SRC
+
+#+NAME: 常用方法-reduce
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // reduce --- 累加器
+
+  // 不带 initialValue
+  var arr = [1,2,3,4,5]
+  res = arr.reduce(function(a,b){ // 不带initialValue; 结果为 15
+      return a+b;
+  }); // 15
+
+  // 带 initialValue
+  res = arr.reduce(function(a,b){return a+b;},10); // initialValue =10; 结果为 25
+
+#+END_SRC
+
+#+NAME: 常用方法-检测函数:every some
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // 检测函数 every 和 some
+  var age = [12,24, 34, 55, 15, 28];
+  res = age.every(function(x){
+      return x>=18;}); // false
+  res = age.some(function(x){
+      return x>=18;}); // true
+  // every 要求所有数组元素都满足回调, 才return true;
+  // some 要求只要有数组元素满足回调, 就return true;
+#+END_SRC
+
+#+NAME: 常用方法-查询索引: indexOf lastIndexOf
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var arr = ['a','b','c','d'];
+  res = arr.indexOf('a'); // 0
+  res = arr.indexOf('A'); // -1
+
+  var arr = ['a','b','c','d', 'a', 'bx', 'a'];
+  res = arr.indexOf('a', 2); // 4
+  res = arr.lastIndexOf('a');// 6
+
+#+END_SRC
+
+#+NAME: 常用方法-判断是否数组: isArray
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // 判断是否是数组的函数, 注意这里是类方法
+  Array.isArray(arr); // true
+  Array.isArray({});  // false, 数组是特化的对象, 对象不是数组
+#+END_SRC
+
+#+NAME: 常用方法-数组转字符串: toString
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // 数组转为字符串
+  arr.toString(); // "a,b,c,d,a,bx,a"
+  // 类似 arr.join()
+  arr.join();    // "a,b,c,d,a,bx,a"
+#+END_SRC
+
+

@@ -1,0 +1,273 @@
+#+TITLE: JS lec-24
+
+* 正则对象 RegExp
+
+** 创建 pattern
+语法
+
+~var patt = new RegExp(pattern, modifiers)~ 动态创建正则表达式
+
+~var patt =/pattern/modifiers~
+
+
+参数
+
+- pattern(模式)描述了表达式的模式;
+- modifiers(修饰符)用于指定全局匹配/区分大小写额匹配/多行匹配,
+
+
+修饰符用于执行区分大小写和全局匹配
+
+常用修饰符
+
+| 修饰符 | 描述                                                 |
+|--------+------------------------------------------------------|
+| i      | 执行对大小写不敏感的匹配                             |
+| g      | 执行全局匹配(查找所有匹配而非在找到第一个匹配后停止) |
+| m      | 执行多行匹配                                         |
+
+eg.
+- ~var res = /java/i.test('hello java')~
+- ~var res = /java/g.test('hello java')~
+- ~var res = /java/m.test('hello java')~
+
+
+
+#+NAME: 正则实例
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var patt = new RegExp("javascript");
+  var res = patt.test('this is javascript course'); // 返回 true
+
+  patt = /javascript/;
+  res = patt.test('this is javascript show time'); // 返回 true
+  res = patt.test('hello JAVASCRIPT');             // 返回 false, 因为这里是大写.
+
+  patt = /javascript/i; // 加上 i 表示忽略大小写
+  res = patt.test('this is javascript show time'); // 返回 true
+#+END_SRC
+
+** 正则语法与 ~test()~
+| 量词   | 描述了表达式的模式                        |
+|--------+-------------------------------------------|
+| n+     | 匹配任何包含至少一个n的字符串             |
+| n*     | 匹配任何包含零个或多个n的字符串           |
+| n?     | 匹配任何包含零个或一个n的字符串           |
+| n{X}   | 匹配X个n的序列的字符串                    |
+| n{X,Y} | 匹配X或Y个n的序列的字符串                 |
+| n{X,}  | 匹配至少包含 X 个n的序列的字符串          |
+| n$     | 匹配任何结尾为 n 的字符串                 |
+| ^n     | 匹配任何开头为 n 的字符串                 |
+| ?=n    | 匹配任何其后紧接指定字符串 n 的字符串     |
+| ?!n    | 匹配任何其后没有紧接指定字符串 n 的字符串 |
+
+
+#+NAME:  test函数
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var patt = new RegExp("javascript");
+  var res = patt.test('this is a javascript course');
+  patt = /javascript/;                // 这是上面的简便写法
+  res = patt.test('hello javascript');
+  res = patt.test('hello JAVASCRIPT');// false
+  patt = /javascript/i;               // 'i' 表示大小写不敏感
+  res = patt.test('hello JAVASCRIPT');// true
+
+  // []
+  res = /[abc]/.test('blue');
+  res = /[abc]/.test('lue');
+  res = /[^abc]/.test('lue');  // '^' 用在 '[]' 内部表示: 能否匹配不在 [] 所示字符意外的一个字符.
+  rest = /[0-9]/.test('this is a test');
+  rest = /[a-z]/.test('this is a test');
+  rest = /php|javascript|ios/.test('ios');
+
+  // 元字符
+  res = /./.test('sdfsdf');       // '.' 表示除换行符之外的任意字符. true
+  res = /./.test('\n');           // '.' 表示除换行符之外的任意字符. false
+  res = /\w/.test('werx');        // '\w' 匹配 0-9,a-z,A-Z true
+  res = /\w/.test('!@#');         // '\w' 匹配 0-9,a-z,A-Z false
+  res = /\W/.test('!@#');         // '\W' 匹配除了 0-9,a-z,A-Z true
+  res = /\s/.test('hello world'); // '\s' 匹配空白字符 true
+  res = /\S/.test('hello world'); // '\S' 匹配非空白字符 true
+  res = /\S/.test('  ');          // '\S' 匹配非空白字符 false
+  res = /\bg/.test('good');       // '\b' 匹配单词边界,这里 '\bg' 在问字母 'g' 之前是单词的边界么 true
+  res = /o\b/.test('good');       // 问 'o' 之后是单词的边界么 false
+  res = /d\b/.test('good');       // 问 'o' 之后是单词的边界么 true
+  res = /d\b/.test('good');       // 问 'd' 之后是单词的边界么 true
+  res = /o\b/.test('good');       // 问 'o' 之后是单词的边界么 false
+  res = /o\B/.test('good');       // 问 'o' 之后不是单词的边界么 true
+
+  // 量词
+  res = /o+/.test('google');      // 能否匹配 'o' 出现至少一次 true
+  res = /o*/.test('google');      // 能否匹配 'o' 出现不出现都可以. true
+  res = /o+/.test('ggle');        // 能否匹配 'o' 出现至少一次 false
+  res = /o*/.test('ggle');        // 能否匹配 'o' 出现不出现都可以. true
+  res = /o?/.test('google');      // 能否匹配 'o' 不出现或只出现一次. true
+  res = /o?/.test('gogle');       // 能否匹配 'o' 不出现或只出现一次. true
+  res = /o?/.test('ggle');        // 能否匹配 'o' 不出现或只出现一次. true
+  res = /o?/.test('gooooooogle'); // 能否匹配 'o' 不出现或只出现一次. true
+
+  /* 注意: 如果 pattern 是单个字符,比如这里,那么匹配目标的时候就把单个字母作为单位
+   ,* 来匹配, 也因此, 这里虽然 'google' 出现多个 'o', 不符合我们说的 '不出现或只出
+   ,* 现一次', 但是因为我们只匹配一个字母, 所以整个 'google' 从 'g' 开始就已经匹配
+   ,* 了.*/
+
+  res = /o{1,3}/.test('google');     // 能否匹配 1~3 个'o' true
+  res = /^k/.test('king');           // 能否匹配一个作为字符串首或者行首的 'k'
+  res = /i$/.test('mai'); true       // 能否匹配一个作为字符串尾或者行尾的 'i'
+  res = /o(?=w)/.test('helloworld'); // 是否能匹配一个后面跟 'w' 的 'o': true
+  res = /o(!=w)/.test('hellomaizi'); // 是否能匹配一个后面跟 'w' 的 'o': false
+  res = /o(?!w)/.test('hellomaizi'); // 是否能匹配一个后面不跟 'w' 的 'o': true
+  res = /\d/.test('sdfsdfsf');       // 是否能匹配一个数字: false
+  res = /\D/.test('sdfsdfsf');       // 是否能匹配一个数字: true
+#+END_SRC
+
+
+** ~exec()~ 方法
+exec 方法:
+
+语法: ~RegExpObject.exec(string)~
+
+参数: String 指定的字符串
+
+描述: 在目标字符串中执行一次正则匹配操作, 并将结果以数组形式返回.
+
+1. 每次执行 exec() 函数都只查找最多一个匹配并返回
+2. 如果为正则表达式设置了全局标志 (g), exec() 函数仍然只返回最多一个匹配, 不过我
+   们可以再次调用该对象的 exec() 函数就可以继续往下查找并返回其对应匹配, 直到为
+   null;
+3. 如果为正则表达式设置了全局标志 (g), test() 函数仍然只查找最多一个匹配, 不过我
+   们再次调用该 test() 函数就可以继续往下查找并返回匹配结果.
+4. 如果 ~regExpObject~ 带有全局标志 (g), test() 函数不是从字符串的开头开始查找,
+   而是从属性 ~regExpObject.lastIndex~ 所指定的索引处开始查找. 该属性值默认为0,
+   所以第一次仍然是从字符串的开头查找. 当找到一个匹配时, ~test()~ 函数会将
+   ~regExpObject.lastIndex~ 的值改为字符串中本次匹配内容的最后一个字符的下一个索
+   引位置. 当再次执行 ~test()~ 函数时, 将会从该索引位置处开始查找, 从而找到下一
+   个匹配.
+5. 当我们使用 ~test()~ 函数执行了一次匹配之后, 如果想要 *重新* 使用 ~test()~ 函
+   数 *从头开始* 查找, 则需要 *手动* 将 ~regExpObject.lastIndex~ 的值 *重置为0*.
+   如果 ~test()~ 函数 *再也找不到* 可以匹配的文本时, 该函数会 *自动* 把
+   ~regExpObject.lastIndex~ 属性 *重置为 0*.
+
+
+#+NAME: exec函数
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  res = /is/.exec('this is a test'); // 被匹配的 'is' 在目标字符串中的首次出现位置
+  //["is", index: 2, input: "this is a test", groups: undefined]
+
+  res = /is/i.exec('this is a test'); // 被匹配的 'is' 在目标字符串中的首次出现位置
+  //["is", index: 2, input: "this is a test", groups: undefined]
+
+  res = /is/ig.exec('this is a test'); // 被匹配的 'is' 在目标字符串中的首次出现位
+                                       // 置
+  //["is", index: 2, input: "this is a test", groups: undefined]
+
+  res = /is/ig.exec('this is a test, and IS a example'); // 被匹配的 'is' 在目标字
+                                                         // 符串中的首次出现位置
+  //["is", index: 2, input: "this is a test, and IS a example", groups: undefined]
+
+  res = /is/ig.exec('this is a test, and IS a example'); // 被匹配的 'is' 在目标字
+                                                         // 符串中的首次出现位置,
+                                                         // exec 返回的是一个数组,
+                                                         // 想得到其中的具体值,需
+                                                         // 要数组索引.
+  //["is", index: 2, input: "this is a test, and IS a example", groups: undefined]
+
+  res[0]; // "is"
+  res[1]; // undefined
+  res[2]; // undefined
+  res[0]; // "is"
+  res.length; // 1
+
+  /* 如果想找到目标字符串中所有的匹配位置 */
+  var str = 'this is a test hello maizi, hello world';
+  var patt = /i/ig;
+  var myArr;
+  while((myArr=patt.exec(str))!=null){ // exec 如果没找到就返回 null, 我们就据此判
+                                       // 断 '目标字符串中是否还有这样的 pattern';
+                                       // 如果不为 null, 我们取出; 如果为 null, 说
+                                       // 明目标字符串被消耗完.
+      var msg = '找到了' + myArr[0]+ '!';
+      msg+='下一个匹配从' + patt.lastIndex;
+      console.log(msg);
+  }
+  // VM6777:4 找到了i!下一个匹配从3
+  // VM6777:4 找到了i!下一个匹配从6
+  // VM6777:4 找到了i!下一个匹配从24
+  // VM6777:4 找到了i!下一个匹配从26
+#+END_SRC
+
+[注意]: 上面的程序,万万不可以直接把 ~/i/ig~ 直接放大 ~while(HERE)~ 条件中, 因为
+会造成死循环.为什么会这样,我也不知道,有待进一步理解. 有可能是因为
+~myArr=/i/ig.exec~ 与 ~myArr=patt~ 最大的区别就是: 前者你每次都重新定义了一个
+pattern --- 也就是 ~lastIndex~ 一直为0.
+
+** 支持正则表达式的 String 对象的方法
+
+有三种常用的 string 对象的方法, 可以直接使用 regexp 对象的 pattern 完成匹配操作:
+
+1. ~str.match(pattern) 返回 Array~
+2. ~str.search(pattern) 返回 Int~
+3. ~str.replace(pattern, 替代字符串) 返回替代后字符串~
+4. ~str.split(pattern) 返回 Array of subString~
+
+~str.match(pattern)~ <==等价于==> ~patt.test(str)~, 但是 *前者* 返回的是一个 *数
+组*,其中第一位存储的是被匹配的子串; 第二位存放的是匹配成功的子串在目标字符串中的
+位置. 后者的结果是一个 ~boolean~.
+
+*** ~match()~
+#+NAME: string对象中 match 方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var str = 'this is a test';
+  var res = str.match(/IS/i); // 不带'g'为非全局匹配,第一次匹配成功就返回
+  res; // ["is", index: 2, input: "this is a test", groups: undefined]
+  var res = str.match(/IS/ig);// 带'g'为全局匹配, 匹配并返回所有
+  res; // ["is", "is"]0: "is"1: "is"length: 2__proto__: Array(0)
+#+END_SRC
+
+*** ~search()~
+#+NAME: string对象中 search 方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var str = 'this is a test';
+  res = str.search(/is/i); // 返回第一次匹配成功时所在目标字符串的位置
+#+END_SRC
+
+*** ~replace()~
+#+NAME: string对象中 replace 方法 --- 全局与局部替换
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var str = 'this is a test';
+  var str1 = str.replace(/is/i, '!'); // 只替换第一个匹配成功的
+  str1; // "th! is a test"
+
+  var str1 = str.replace(/is/ig, '!'); // 替换所有的
+  str1; // "th! ! a test"
+#+END_SRC
+
+#+NAME: string对象中 replace 方法 --- 分组匹配和替换
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var str = '2015-09-27';
+  res=str.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1'); // "09/27/2015"
+
+  // 上面这个是分组的效果, 各个分组各自的匹配结果会被存到一个变量中, 被后面的 '$1''$2''$3' 引用得到.
+  str = 'hello Mazi Edu'; // "hello Mazi Edu"
+#+END_SRC
+
+#+NAME: string对象中 replace 方法 --- 使用函数生成替换结果
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // 把所有大写字母替换成小写;
+  res = str.replace(/[A-Z]/g, func);
+
+  function func(match){
+      return 'king_'+match.toLowerCase();
+  }
+
+  res; // "09/27/2015"
+  res = str.replace(/[A-Z]/g, func); // "hello king_mazi king_edu"
+  res; // "hello king_mazi king_edu"
+#+END_SRC
+
+*** ~split()~
+#+NAME: string对象中 split 方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  // 按照匹配的位置拆分字符串
+  var str = 'this is a test';
+  res=str.split(/\s+/); //在一个或多个空白处拆分字符串: (3)["hello", "Mazi", "Edu"]
+#+END_SRC

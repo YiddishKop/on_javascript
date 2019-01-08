@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>事件</h1>
+    <div id='box1' style='background: #ABCDEF; width: 300px; height:300px;'>
+      <input type="button" name="" value="test1" id='btn1' />
+    </div>
+    <script type="text/javascript">
+     var btn1 = document.getElementById('btn1');
+     var box1 = document.getElementById('box1');
+
+     btn1.onclick = function(){
+       alert('btn clicked');
+       // 取消冒泡
+       var e = e||window.event;
+
+       // w3c取消冒泡
+       /* e.stopPropagation(); */
+
+       // IE 取消冒泡
+       /* e.cancelBubble=true */
+
+       if(typeof e.cancelBubble=='undefined'){  // 浏览器兼容处理, 如果这个变量没定义说明其为 w3c 标准, 则通过 stopPropagation() 停止传播; 如果这个变量定义了, 说明其为 IE 标准, 通过 cancelBubble() 停止传播
+         e.stopPropagration();
+       }else{
+         e.cancelBubble = true;
+       }
+     }
+
+     box1.onclick = function(){
+       alert('div clicked');
+     }
+
+     document.body.onclick= function(){
+       alert('bodyclicked');
+     }
+
+     document.documentElement.onclick= function(){
+       alert('htmlclicked');
+     }
+
+     document.onclick= function(){
+       alert('document clicked');
+     }
+
+    </script>
+  </body>
+</html>

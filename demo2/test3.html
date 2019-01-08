@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript">
+     /*
+        if(exp) {
+          code if exp is ture;
+        }else{
+          code if exp is ture;
+        }
+      */
+
+     /* 以下统统转换成 false; 其余的全部转换成 true */
+     /* var a;         // type of a is undefined */
+     /* var a=null;    // type of a is object */
+     /* var a=0;       // type of a is number */
+     /* var a=0.0;     // type of a is number */
+     /* var a=0/0;     // type of a is number */
+     var a="";      // type of a is string
+     alert(typeof a);
+     if (a){ // 此处, undefined -> false
+       alert("真")
+     }else{
+       alert("假")
+     }
+
+
+    </script>
+    </script>
+  </head>
+  <body>
+    <h1>隐式转换</h1>
+  </body>
+</html>

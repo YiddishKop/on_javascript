@@ -1,0 +1,80 @@
+#+TITLE: JS lec-18
+
+* 对象属性特性
+
+属性的 5 个特性:
+1. writable
+2. enumerable
+3. configuable
+4. setter
+5. getter
+
+属性与对象相关的 3 个特性:
+1. proto
+2. class
+3. extensible
+
+
+[注意]: 访问对象原型的属性, 与访问对象的属性是 *完全一样* 的. 他先找该对象的属性,
+如果找不到就到对象的原型的属性中去寻找(比如这里的 ~z~). 且对象的原型仍然是一个对
+象,我们可以继续找 *对象的原型的原型的属性*.
+
+
+对象原型的三层结构:
+1. 通过构造函数创建的对象(~foo~)的原型是 ~foo.prototype~;
+2. ~foo.prototype~ 的原型是 ~object.prototype~;
+3. ~object.prototype~ 的原型就是 ~null~;
+
+#+NAME: 对象原型属性设置
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 创建一个构造函数 */
+  function foo(){}
+
+  /* 原型属性 z 设置为5 */
+  foo.prototype.z=5;
+
+  /* 创建一个对象 */
+  var obj=new foo();
+
+  /* 访问这个对象的原型的属性 */
+  obj.z // 返回5
+
+  /* 访问当前对象没定义的函数, 也会往更高的原型去寻找*/
+
+  obj.toString // ƒ toString() { [native code] }
+#+END_SRC
+
+[[file:对象属性特性/screenshot_2018-11-14_10-55-40.png]]
+
+
+[注意]:
+1. 对象字面量的原型通过 ~字面量对象名._proto_~ 获取原型
+2. 构造函数创建的对象的原型通过 ~构造函数名._proto_~ 获取原型
+3. 通过 ~Object.create~ 创建的对象通过 ~对象名._proto_~ 获取原型
+
+
+[注意]:
+1. 判断某个属性是否在某个对象(包含原型链)中,可以通过 ~'属性' in 对象~ 语句来做检
+   测.
+2. 判断某个属性是否在某个对象( *不* 包含原型链)中,可以通过 ~对象.hasOwnProperty('属
+   性')~ 来判断.
+
+#+NAME: 检测属性是否处在对象中
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function foo(){} // undefined
+  foo.prototype.z=5; // 5
+  var obj=foo();
+  var obj=new foo();
+  obj.z // 5
+  obj.toString // ƒ toString() { [native code] }
+
+  /* 检测属性是否在对象(包含原型链中) */
+  'x' in obj // false
+  obj // foo {}__proto__: Object
+  'z' in obj // true
+
+  /* 检测属性是否在对象(不包含原型链中) */
+  obj.hasOwnProperty('x') //false
+  obj.hasOwnProperty('z') //false
+#+END_SRC
+

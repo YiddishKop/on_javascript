@@ -1,0 +1,368 @@
+#+TITLE: js lec-14
+
+*js 中函数也是数据.*
+
+* 匿名函数
+
+匿名函数在其他语言中经常使用 ~lambda~, 在 javascript 中就是用关键字 ~function~.
+
+1. ~var fn1 = function calc(a,b){return a+b;};~
+2. ~var fn2 = function(a,b){return a+b;};~
+
+#+NAME: 匿名函数
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var test = function calc(a,b){
+      return a+b;}
+
+  typeof test // "function"
+  test(1,2) // 3
+  // function(x,y){return x*y};
+  // VM808:1 Uncaught SyntaxError: Unexpected token (
+  var test1 = function(x,y){return x*y}; // 匿名函数
+#+END_SRC
+
+* 回调函数
+
+*回调函数 = 函数指针 = 函数式编程中函数参数*
+
+** 自定义回调函数
+
+#+NAME: 普通回调函数
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+function calc(x,y){return x()+y();};
+function test1(){return 3;};
+function test2(){return 5;};
+calc(test1, test2); // 8
+#+END_SRC
+
+上例中, ~test1~ 和 ~test2~ 就是 *回调函数*, 如果回调函数同时是一个 *匿名函数*,
+那么他就是著名的 *匿名回调函数*, 在函数式编程中就是 *lambda函数参数*.
+
+#+NAME: 匿名回调函数
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+calc(function(){return 3;}, function(){return 5;}); // 8
+#+END_SRC
+
+回调函数(函数指针,函数参数)的好处:
+1. 可以让我们 *不做命名* 的情况下传递函数, 这样可以节省全局变量;
+2. 我们可以将一个函数调用操作 *委托* 给另一个函数, 这样可以节省一些代码编写;
+3. 有助于 *性能提升*.
+
+#+NAME: 普通函数组合
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function multiplyByTwo(a,b,c){
+      var i, arr=[];
+      for(i=0;i<3;i++){
+          arr[i]=arguments[i]*2;
+      }
+      return arr;
+  }
+
+  function add1(a){
+      return a+1;
+  }
+
+  var arr1=[];
+
+  arr1 = multiplyByTwo(10,20,30); //[20, 40, 60]
+
+  for(i=0;i<3;i++){arr1[i]=add1(arr1[i])};
+
+  arr1 //[21, 41, 61]
+#+END_SRC
+
+缺点:
+1. ~for~ 循环太浪费资源;
+2. 数组 ~arr1~ 完全就是中间变量, 中间变量在组合过程中是可以省去的.
+
+
+#+NAME: 函数组合改进
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function test(a,b,c,callback){
+      var i,arr=[];
+      for(i=0;i<3;i++){
+          arr[i]=callback(arguments[i]*2);
+      }
+      return arr;
+  }
+
+  test(10,20,30,add1); //[21, 41, 61]
+#+END_SRC
+
+但凡你想 *传递功能* 的, 或是在函数中 *使用某个功能* 的, 都可以将其声明为回调函数.
+
+更进一步:
+
+#+NAME: 再进一步
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  test(10,20,30, function(a){return a+1;}); //[21, 41, 61]
+#+END_SRC
+
+类似模板思想:
+
+~定义函数参数~ + ~传递匿名函数~ = ~更高的自由度~
+
+
+* 自调函数
+
+   格式为: ~( 匿名函数定义 )(匿名函数参数);~
+
+   #+NAME: 自调函数
+   #+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+     // 函数定义和调用一次完成, 且每次调用都必须重新定义
+     ( function(){alert('hello,world')} )();
+   #+END_SRC
+
+   #+NAME: 对比普通函数
+   #+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+     // 函数定义, 产生全局变量 'test'
+     function test(){alert('hello,world')};
+     // 函数调用, 调用时不需要重新定义
+     test();
+   #+END_SRC
+
+自调函数优点:
+
+1. 使用匿名函数 *不会产生* 任何全局变量;
+2. 函数 *无法重复执行*, 适合执行一些 *一次性* 的或者 *初始化* 的任务;
+* 重新绑定函数与对象
+1. ~彼对象.彼方法.call(此对象, 参数1, 参数2, ...)~
+2. ~彼对象.彼方法.apply(此对象, 参数数组)~
+3. ~彼对象.彼方法.bind(此对象)~
+
+这三种方法其实都在做一件事情: *绑定函数与对象*. 只不过 apply 和 call 是绑定立即
+执行. 而 bind 是绑定之后生成新的函数.
+
+
+#+BEGIN_QUOTE
+scala 中也有类似函数!
+#+END_QUOTE
+
+
+** The JavaScript ~call()~ Method
+The ~call()~ method is a predefined JavaScript method. It can be used to invoke
+(call) a method with an owner object as an argument (parameter).
+
+#+BEGIN_QUOTE
+With ~call()~, *an object can use a method belonging to another object*.
+#+END_QUOTE
+
+1. 如果对象调用 *自己定义的方法* 使用的格式为: ~此对象.此方法()~;
+2. 如果对象调用 *自己没有定义的方法* 格式为: ~彼对象.彼方法.call(此对象, 彼参数
+   1, 彼参数2)~
+
+
+This example calls the fullName method of person, using it on person1:
+
+#+NAME: 通过call使用其他对象的方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var person = {
+    fullName: function() {
+        return this.firstName + " " + this.lastName;
+    }
+}
+var person1 = {
+    firstName:"John",
+    lastName: "Doe",
+}
+var person2 = {
+    firstName:"Mary",
+    lastName: "Doe",
+}
+person.fullName.call(person1);  // Will return "John Doe"
+person.fullName.call(person2);  // Will return "Mary Doe"
+#+END_SRC
+
+这里就比较奇怪: *~person~ 中没有 ~firstName~ 属性; ~person1~ 中没有 ~fullName~
+方法*. 他们是如何结合在一起的呢.
+
+
+#+NAME: 图示call方法机制(无参)
+#+BEGIN_EXAMPLE
+var person1 = {firstName:"John", lastName: "Doe"}
+var person = {
+    fullName: function() {
+        return this.firstName + " " + this.lastName;}}
+               ----
+                |
+                +-------+
+                        | 上面的 this 经过下面这条 *绑定* 语句
+                        | 之后, 就指向了 person1, 所以 call
+                        | 方法实际就是把某个函数和某个对象做绑定,
+                        | 绑定的方式就是 "this".
+                        |
+                        | person.fullName.call(person1)
+                        | =>bind fullName with person1
+                        |
+                        v
+                      person1
+#+END_EXAMPLE
+
+
+This example *calls the fullName method of person, using it on person2*:也就是
+说, ~person2~ 可以调用自己根本没有定义的方法 ~fullName~,
+1. 如果调用对象自己定义的 方法使用的格式为 ~此对象.此方法()~;
+2. 如果是调用自己没有定义的方法格式为: ~彼对象.彼方法.call(此对象, 彼参数1, 彼参数2)~
+
+The call() method can accept arguments:
+
+#+NAME: 通过call使用其他对象的方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var person = {
+    fullName: function(city, country) {
+        return this.firstName + " " + this.lastName + "," + city + "," + country;
+    }
+}
+var person1 = {
+    firstName:"John",
+    lastName: "Doe",
+}
+person.fullName.call(person1, "Oslo", "Norway");
+#+END_SRC
+
+
+#+NAME: 图示call方法机制(有参)
+#+BEGIN_EXAMPLE
+var person1 = {firstName:"John", lastName: "Doe"}
+var person = {
+                        |       |
+                        v       v
+    fullName: function(city, country) {
+        return this.firstName + " " + this.lastName + "," + city + "," + country;}}
+                 ^                     ^
+                 |                     |
+                 +------+--------------+
+                        |
+                        |
+person.fullName.call(person1, "Oslo", "Norway");
+                                ^         ^
+                                |         |
+#+END_EXAMPLE
+
+所以 ~彼方法~ 中的运算对象可以包含 ~此对象的属性~ 和 ~彼方法的参数~.
+
+
+** The JavaScript ~apply()~ Method
+
+With the ~apply()~ method, you can write a method that can be used on different
+objects. The JavaScript ~apply()~ Method. The ~apply()~ method is similar to the
+~call()~ method (previous chapter).
+
+In this example the fullName method of person is applied on person1:
+
+#+NAME: apply方法的使用
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var person = {
+    fullName: function() {
+        return this.firstName + " " + this.lastName;
+    }
+}
+var person1 = {
+    firstName: "Mary",
+    lastName: "Doe",
+}
+person.fullName.apply(person1);  // Will return "Mary Doe"
+
+#+END_SRC
+
+The Difference Between call() and apply(), The difference is:
+- The ~call()~ method takes arguments separately.
+- The ~apply()~ method takes arguments as an array.
+
+The ~apply()~ method is very handy if you want to use an *array* instead of *an
+argument list*.
+
+The apply() Method with Arguments. The apply() method accepts arguments in an
+array:
+
+#+NAME: 带参数的apply方法如何使用
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var person = {
+    fullName: function(city, country) {
+        return this.firstName + " " + this.lastName + "," + city + "," + country;
+    }
+}
+var person1 = {
+    firstName:"John",
+    lastName: "Doe",
+}
+person.fullName.apply(person1, ["Oslo", "Norway"]);
+#+END_SRC
+
+Compared with the ~call()~ method:
+
+#+NAME: 对比带参数的call方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var person = {
+    fullName: function(city, country) {
+        return this.firstName + " " + this.lastName + "," + city + "," + country;
+    }
+}
+var person1 = {
+    firstName:"John",
+    lastName: "Doe",
+}
+person.fullName.call(person1, "Oslo", "Norway");
+
+#+END_SRC
+
+Simulate a Max Method on Arrays
+
+You can find the largest number (in a list of numbers) using the ~Math.max()~
+method:
+
+#+NAME: findMax方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+Math.max(1,2,3);  // Will return 3
+#+END_SRC
+
+Since JavaScript ~arrays do not have a max()~ method, you can apply the
+Math.max() method instead.
+
+#+NAME: 'apply'max方法'to'其他对象
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+Math.max.apply(null, [1,2,3]); // Will also return 3
+#+END_SRC
+
+The first argument (null) does not matter. It is not used in this example.
+
+These examples will give the same result:
+
+用这个例子告诉你, ~apply(对象, 参数数组)~ 方法更关注的是其第二个参数, 也正式这个
+参数会被传递给真正的调用者, 也就是这里的 ~彼对象.彼方法~. 除非这个 ~参数数组~ 与
+~对象~ 之间存在某种关系 --- 比如 ~参数数组~ 是 ~对象~ 的属性.
+
+#+NAME: 例子
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  Math.max.apply(Math, [1,2,3]); // Will also return 3
+
+  Math.max.apply(" ", [1,2,3]); // Will also return 3
+
+  Math.max.apply(0, [1,2,3]); // Will also return 3
+#+END_SRC
+
+*JavaScript Strict Mode*. In JavaScript strict mode, if the *first argument* of
+the ~apply()~ method is *not an object*, it becomes the *owner (object)* of the
+invoked function. In "non-strict" mode, it becomes the *global object*.
+
+** The JavaScript ~bind()~ Method
+
+bind() 函数与前面两个不太一样的地方是, 他更灵活 --- 他并 *不是直接运行函数*, *而
+是直接生成函数*. 这个函数可以作为新的函数保存下来, 用在其他地方. 而 apply 和
+call 则无法做到这一点. 但需要注意一点: 新生成的函数中的 ~this.attr~ 会变成 *常量,
+其值为被绑定的对象的属性*.
+
+#+NAME: bind函数中的this的变化
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var person = {firstName:'yuan', lastName:'long'}
+  var person1 = {
+      fullName: function(){
+          return this.firstName + " " + this.lastName;
+      }
+  }
+
+  /* 绑定函数与对象生成新的函数 */
+  var newFunction = person1.fullName.bind(person);
+  /* 彼函数的this.attr在新函数中已经成为常量 */
+  console.log(newFunction()); // 此时应该打印出: yuan long
+#+END_SRC

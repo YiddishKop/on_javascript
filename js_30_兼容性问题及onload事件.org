@@ -1,0 +1,16 @@
+#+TITLE: JS lec-30
+
+框架/对象(Frame/Object)事件
+
+| 属性           | 描述                                   |
+|----------------+----------------------------------------|
+| onabort        | 图像的加载被终端, (<object>)           |
+| onbeforeunload | 该事件在即将离开页面(刷新or关闭)       |
+| onerror        | 在加载文档或图像时发生错误 (<object>)  |
+| onhashchange   | 该事件在当前 URL 的锚部分发生修改      |
+| onload         | 一张页面或一副图像完成加载             |
+| onpageshow     | 该事件在用户访问页面时触发             |
+| onpagehide     | 该事件在用户离开当前网页跳转到另一页面 |
+| onresize       | 窗口或框架被重新调整大小               |
+| onscroll       | 当文档被滚动时发生                     |
+| onunload       | 用户退出页面                           |

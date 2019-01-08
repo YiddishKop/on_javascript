@@ -1,0 +1,136 @@
+#+TITLE: JS lec-11
+
+* 函数
+
+** 声明函数
+函数是 *全局* 的,在 *函数声明之前之后* 都可以调用.
+
+注意:
+1. 函数名字可以重复,但会发生覆盖;
+2. 函数通过 return 来加返回值, 如果没有 return 则返回 undefined.
+
+#+NAME: 函数声明之前之后都可以调用
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+    <script type="text/javascript">
+     test(); // this is a test
+     function test(){
+       alert('this is test')
+     }
+     test();
+    </script>
+#+END_SRC
+
+#+NAME: 函数名称重复会产生覆盖
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+    <script type="text/javascript">
+     test(); // 'this is another test'
+     function test(){
+       alert('this is test')
+     }
+     function test(){
+       alert('this is another test')
+     }
+     /* test(); */
+    </script>
+#+END_SRC
+
+#+NAME: 没有return则返回Undefined
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+  <script type="text/javascript">
+   test(); // 'this is another test'
+   function test(){
+     alert('this is test')
+   }
+   function test(){
+     alert('this is another test')
+   }
+
+   alert(test()); // 弹框 'undefined'
+  </script>
+
+#+END_SRC
+
+** 调用函数
+
+*** 作为一个函数调用
+1. 通过函数名称()进行调用,如果有参数传递参数即可
+2. 在 HTML 中默认的全局对象是 HTML 页面本身, 所以函数是属于 HTML 页面. 在浏览器
+   中的页面对象是浏览器窗口(window对象). 所以函数会自动变为 window 对象的函数.
+   也可以通过 ~window.函数名称()~ 进行调用.
+*** 函数作为方法(method)调用
+    可以将函数定义为对象的方法进行调用.
+*** 使用构造函数调用函数
+    如果在函数调用前使用了 ~new~ 关键字, 则调用了构造函数.
+*** 作为回调函数调用函数
+    - ~call()~
+    - ~apply()~
+
+** 参数
+
+1. 定了参数但没有传值, 则该参数为 ~undefined~. (非常重要); 如果函数体内进行了加法运算返回的不是数字而是一个 ~NaN~
+2. 传递参数个数超过了定义的参数个数, js 会忽略掉多余参数;
+3. JS 中不能直接写默认值,可以通过 ~arguments~ 对象来实现默认值效果;
+4. 可以通过 ~arguments~ 对象实现可变参数的函数;
+5. 通过 ~值传递~ 参数在函数体内对变量做修改 ~不会~ 影响变量本身;
+6. 通过 ~对象传递~ 参数在函数体内对变量做修改 ~会~ 影响变量本身;
+
+#+NAME: 忽略多余参数
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+    <script>
+     function calc(num1, num2){
+       return num1+num2;
+     }
+
+     alert(calc(1,2,3,4)); // 3,4 会直接被忽略
+    </script>
+#+END_SRC
+
+
+#+NAME: 如何实现参数默认值
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+    <script>
+     /* 通过函数体内对参数做判断来实现参数默认值  */
+     function calc1(num1, num2){
+       num1 = num1 || 1; // 短路操作实现类似 is ... or ... 功能
+       num1 = num1 || 2;
+       return num1+num2;
+     }
+     alert(calc1()); // 返回 3
+     alert(calc1(1)); //
+     alert(calc1(1,3));
+    </script>
+#+END_SRC
+
+
+
+#+NAME: 如何实现参数默认值二
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+<script>
+  /* 通过三目运算符来实现参数默认值  */
+  function calc2(x,y){
+    y = y===undefined?0:y;
+    return x+y;
+  }
+  alert(calc2());
+  alert(calc2(1));
+  alert(calc2(1,3));
+</script>
+
+#+END_SRC
+
+#+NAME: 如何实现参数默认值三
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+<script>
+  /* 通过 arguments 数组对象来实现参数默认值  */
+  function calc3(x,y){
+    alert(arguments[0]);
+    alert(arguments[1]);
+    x=arguments[0]?arguments[0]:0;
+    y=arguments[1]?arguments[1]:0;
+    return x+y;
+  }
+  alert(calc3());
+  alert(calc3(1));
+  alert(calc3(1,2));
+</script>
+#+END_SRC

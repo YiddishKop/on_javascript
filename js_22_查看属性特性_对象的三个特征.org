@@ -1,0 +1,199 @@
+#+TITLE: JS lec-22
+
+* 一次设置/修改多个属性
+
+#+BEGIN_QUOTE
+很奇怪的一点事, JS 似乎特别喜欢用 ~{x:1, y:2}~ 这种格式. 不论是创建对象字面量的
+属性时, 还是创建多个属性的特性时, 都是使用这种结构.
+#+END_QUOTE
+
+通过 ~Object.defineProperties~ 来一次设置多个属性.
+
+defineProperties 语法格式为:
+
+#+NAME: defineProperties用法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+defineProperties(objName, {
+  'attrName1' : {
+     value: ,
+     writable: ,
+     enumerable: ,
+     configurable: },
+
+  'attrName2' : {
+     value: ,
+     writable: ,
+     enumerable: ,
+     configurable: },
+
+  'attrName3' : {
+     value: ,
+     writable: ,
+     enumerable: ,
+     configurable: },
+})
+#+END_SRC
+
+#+NAME: defineProperty用法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  defineProperties(objName, 'attrName', {
+     value: ,
+     writable: ,
+     enumerable: ,
+     configurable: },
+  })
+#+END_SRC
+
+#+NAME: 一次定义多个属性例子
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 定义一个对象字面量 */
+  var person = {
+      name:'袁龙',
+      age:31,
+      location:'南京'
+  }
+
+  /* 定义一个属性 */
+  Object.defineProperty(person, 'name', {
+      value: 'yuanlong',
+      writable: true,
+      configurable: true,
+      enumerable: true}); // {name: "yuanlong"}
+
+  /* 一次定义多个属性 */
+  Object.defineProperties(person, {
+      'name':{
+          value: '袁龙',
+          writable: true,
+          enumerable: true,
+          configurable: true},
+      'age':{
+          value: 31,
+          writable: true,
+          enumerable: true,
+          configurable: true},
+      'location':{
+          value: '南京',
+          writable: true,
+          enumerable: true,
+          configurable: true})
+                          VM604:16 Uncaught SyntaxError: Unexpected token )
+  Object.defineProperties(person, {
+      'name':{
+          value: '袁龙',
+          writable: true,
+          enumerable: true,
+          configurable: true},
+      'age':{
+          value: 31,
+          writable: true,
+          enumerable: true,
+          configurable: true},
+      'location':{
+          value: '南京',
+          writable: true,
+          enumerable: true,
+          configurable: true}}) // {name: "袁龙", age: 31, location: "南京"}
+#+END_SRC
+
+* 查看某个对象的某个属性的四个特性
+
+~Object.getOwnPropertyDescriptor(objName, 'attrName')~
+
+#+NAME: 获取某个属性的特性描述
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  Object.getOwnPropertyDescriptor(person, 'name')
+  {value: "袁龙", writable: true, enumerable: true, configurable: true}
+#+END_SRC
+
+* 对象的三个特性(一)
+
+** 1. 对象的原型(prototyep)
+   指向另一个对象, 本对象的属性继承自他的原型对象.
+*** 1. 通过 ~对象字面量~ 创建的对象使用 ~Object.prototype~ 作为他的原型
+    #+NAME: 原型对象1
+    #+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+      // Object.prototype属性 是 xxx 的原型对象
+      var xxx = {};
+      Object.prototype.isPrototypeOf(xxx);// true
+    #+END_SRC
+*** 2. 通过 ~new~ 创建的对象使用 ~构造函数的 prototype 属性~ 作为他们的原型
+    #+NAME: 原型对象2
+    #+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+      // 构造函数 YYY() 的 prototype 属性就是 yyy 的原型对象
+      function YYY(){};
+      var yyy = new YYY();
+      YYY.prototype.isPrototypeOf(yyy);// true
+    #+END_SRC
+*** 3. 通过 ~Object.create()~ 创建的对象使用 ~第一个参数(也就是null)~ 作为他们的原型.
+    #+NAME: 原型对象3
+    #+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+      // obj 就是 obj1 的原型对象
+      var obj = {x:1};
+      var obj1=Object.create(obj);
+      obj.isPrototypeOf(obj1);// true
+    #+END_SRC
+** 2. 对象的类(class)
+   标识对象类型的字符串. 可以通过 ~objName.toString()~ 来查询或间接得到对象的类
+   型信息.
+
+#+NAME: 查询对象的类属性
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var obj={};
+  obj.toString(); // "[object Object]"
+
+  var arr = new Array();
+  arr.toString(); // "[object Array]"
+
+  'a'.toString(); // "a"
+  Object.prototype.toString.call("a"); // "[object String]"
+  Object.prototype.toString.call("a").slice(8,-1); // "String"
+#+END_SRC
+
+
+让我们来定义一个函数, wrap ~.toString()~ 方法来获取某个 *对象的类(class)*.
+
+#+NAME: 输出对象类型
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function classof(obj){
+      if(obj===null){
+          return 'NULL';
+      }
+      if(obj===undefined){
+          return 'Undefined';
+      }
+      return Object.prototype.toString.call(obj).slice(8, -1);
+  }
+
+  var x = null;
+  classof(x) // "NULL"
+  var x = 123;
+  classof(x) // "Number"
+  var y;
+  classof(y); // "Undefined"
+  var x= [1,2,3,4];
+  classof(x); // "Array"
+  var x = window;
+  classof(x); // "Window"
+  x = function(){};
+  classof(x) // "Function"
+#+END_SRC
+
+
+注意,必须把 ~null~ 和 ~Undefined~ 排除在外,因为:
+
+#+NAME: 输出对象类型(误)
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function classOf(obf){
+      return Object.prototype.toString(obj).slice(8, -1);
+  }
+
+  var y;
+  classOf(y) // "[object Object]"
+  var z = null;
+  classOf(z) // "[object Object]"
+#+END_SRC
+
+可以看到, 对于值为 undefined or null 的对象, 输出的都会是 "Object".
+** 3. 对象的扩展标记(extensible flag)
+   指明是否可以向对象添加新属性.

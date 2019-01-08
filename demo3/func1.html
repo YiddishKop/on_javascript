@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript">
+     test();
+     function test(){
+       alert('this is test')
+     }
+     function test(){
+       alert('this is another test')
+     }
+
+     alert(test()); // 弹框 'undefined'
+     window.alert('这是一个 window 调用的弹窗'); // 与上面等效
+
+     function calc(num1, num2){
+       return num1+num2;
+     }
+
+     alert(calc(1,2,3,4)); // 3,4 会直接被忽略
+
+     /* 通过函数体内对参数做判断来实现参数默认值  */
+     function calc1(num1, num2){
+       num1 = num1 || 1; // 短路操作实现类似 is ... or ... 功能
+       num2 = num2 || 2;
+       return num1+num2;
+     }
+     alert(calc1()); // 返回 3
+     alert(calc1(1)); //
+     alert(calc1(1,3));
+
+     /* 通过三目运算符来实现参数默认值  */
+     function calc2(x,y){
+       y = y===undefined?0:y;
+       return x+y;
+     }
+     alert(calc2());
+     alert(calc2(1));
+     alert(calc2(1,3));
+
+     /* 通过 arguments 数组对象来实现参数默认值  */
+     function calc3(x,y){
+       alert(arguments[0]);
+       alert(arguments[1]);
+       x=arguments[0]?arguments[0]:0;
+       y=arguments[1]?arguments[1]:0;
+       return x+y;
+     }
+     alert(calc3());
+     alert(calc3(1));
+     alert(calc3(1,2));
+
+     /* 通过 arguments 数组对象来实现可变参数  */
+     function test(){
+       var paramsNum=arguments.length; // 得到传入参数的个数
+       var sum=0;
+       for(var i=0;i < paramsNum;++i){
+         sum += arguments[i];
+       }
+       return sum;
+     }
+     alert(test(1,2,3,9,3,4,55));
+
+
+    </script>
+  </head>
+  <body>
+    <h1>函数</h1>
+  </body>
+</html>

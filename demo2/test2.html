@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script type="text/javascript">
+     var a=12;
+     a=-12.23;
+     a=0.22e2;
+     alert(a);
+
+     b=0123;
+     alert(b);
+
+     c=2e310;
+     alert(c); // 'Infinity'
+     c=-2e310;
+     alert(c); // '-Infinity'
+
+     d=0/0;
+     alert(d); // 'NaN'
+     alert(isNaN(d)); // 'true'
+
+     var f;
+     alert(f);
+
+     var n=null;
+     alert(n == f); // true;值比较
+     alert(n === f); // false;类型比较
+
+
+
+    </script>
+  </body>
+</html>

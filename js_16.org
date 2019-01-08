@@ -1,0 +1,122 @@
+#+TITLE: JS lec-16
+
+* 对象
+
+与 C++ 或者 Java 不同, Javascript 是一种基于原型的编程语言, 并没有 class 语句, 而是 *把函数用作类*.
+
+** 自定义对象
+*** 对象字面量(object literal) ~var obj={}~
+
+#+BEGIN_QUOTE
+对象字面量是一个 *表达式*, 这个表达式的每次运算都创建并初始化一个新对象. 每次计
+算对象字面量的时候, 也都会计算他的每个属性的值. 也就是说, 如果在一个重复调用的函
+数中的循环体内使用了对象直接量, 并且每次创建的 *对象的属性值也有可能不同*.
+#+END_QUOTE
+
+[注意]: 对象字面量在语法格式上有点类似 python 或者 java 中的 *字典* :
+~{key:value, key:value,...}~. 只不过在 *JS 中对象字面量声明的不是键值对而是名值
+对*
+
+#+NAME: 对象字面量
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var obj = {}; // 没有任何属性的对象
+typeof obj // "object"
+var obj1 = {x:1, y:2, z:3}; // 名-值对的形式
+#+END_SRC
+
+[注意]: 可以将属性名括在引号之间.
+
+普通形式:
+1. ~var obj={prop:1}~
+2. ~var obj={"prop":1}~
+3. ~var obj={'prop':1}~
+
+必须放到引号之间:
+1. 如果属性名是 js 的保留字;
+2. 如果属性名是包含特殊符号(除字母/数字/下划线以外);
+3. 如果属性名以数字开头;
+4. 在 ECMAScript5 中,保留字可以用作不带引号的属性名;
+5. 在 ECMAscript5 中对象直接量中的最后一个属性后的逗号将被忽略.
+
+
+[注意]: 对象字面量是可以 *嵌套的*.
+
+#+NAME: 对象字面量
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var obj = {}; // 没有任何属性的对象
+
+  typeof obj //"object"
+
+  var obj1 = {x:1, y:2, z:3}; // 名-值对的形式
+
+  var obj2 = {
+      'for':3,
+      '%':4,
+      'ni-hao':5,
+      married:true,
+      salary:12.34,
+      person:{     // 嵌套的对象字面量
+          username:'king',
+          age:12,
+          addr:'北京'}
+  }
+#+END_SRC
+
+*** 一般对象创建方法: ~var obj=new Object()~
+
+    #+NAME: 通过new关键字创建对象
+    #+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+      /* Object, Array, RegExp, Date 都是 JS 内置类*/
+      var obj3 = new Object(); // 创建一个空对象, 类似: var obj={};
+      var arr = new Array(); // 空数组对象, []
+      var reg = new RegExp('js'); // 创建正则对象
+      var date = new Date(); // 创建日期时间对象
+    #+END_SRC
+
+*** 通过构造函数创建对象
+
+    [注意]: JS 中是没有 *类* 的, 或者说 JS 中只有 *函数*, 对象既然是对数据和方法
+    的封装, 那么 JS 中 ~函数 = 类~ (函数自己是函数,同时也是数据). 所以 JS 中 *类
+    的声明* 就变成了 *函数声明*, *类的属性定义使用 ~this.attrName~ *. *对象的创
+    建* 只是比 *函数调用* 多了一个关键字 *new* 而已.
+
+    1. 类的定义 = 函数的定义
+    2. 属性的定义使用 this
+    3. 对象的创建 = new + 函数的调用
+
+
+[注意]:
+1. 使用的时候通过 new 操作符得到对象: ~var person1 = new Person()~
+2. 通过 ~instanceof~ 操作符可以检测一个对象是否是某个指定的构造器函数创建的
+2. 用构造器创建对象的时候可以接收参数
+3. 构造器函数的首字母最好大写, 区别其他的一般函数
+
+#+NAME: 通过构造器函数创建对象
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  function Test(){
+  }
+
+  var obj4 = new Test();
+
+  function Test1(num1, num2){
+      this.n1 = num1;
+      this.n2 = num2;
+  }
+
+  var obj5 = new Test1(5,6);
+
+  obj5 // Test1 {n1: 5, n2: 6}
+
+  obj5 instanceof Test1 // true
+#+END_SRC
+
+*** 通过 Object.create 创建对象
+
+[注意]: 语法大概就是 ~Object.create(字面量方式)~: eg, ~var obj = Object.create({x:1})~.
+
+[注意]: 对比理解
+
+| 创建方式               | 语法                                          | 例子                            |
+|------------------------+-----------------------------------------------+---------------------------------|
+| 字面量对象             | ~var obj={attrName:attrValue}~                | ~var obj={x:1};~                |
+| Object.create 创建对象 | ~var obj=Object.create({attrName:attrValue})~ | ~var obj=Object.create({x:1});~ |

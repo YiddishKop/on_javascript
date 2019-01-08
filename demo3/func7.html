@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>事件</h1>
+    <div id='box1' style='background: #ABCDEF; width: 300px; height:300px;'>
+      <input type="button" name="" value="test1" id='btn1' />
+    </div>
+    <script type="text/javascript">
+     var btn1 = document.getElementById('btn1');
+     var box1 = document.getElementById('box1');
+
+     /*
+      * 通过 addEventListener 我们可以实现类似脚本模型的功能, 而且可以为一个事件添加多个事件处理程序.
+      */
+     btn1.addEventListener('click', function(e){
+       alert('button click');
+       var e = e || window.event;
+       if(typeof e.cancelBubble == 'undefined'){
+         e.stopPropagation();
+       }else{
+         e.cancelBubble = true;
+       }
+     }, false);
+
+     box1.addEventListener('click', function(){
+       alert('div click');
+     }, false);
+
+     document.body.addEventListener('click', function(){
+       alert('body click');
+     }, false);
+
+     document.documentElement.addEventListener('click', function(){
+       alert('html click');
+     }, false);
+
+     document.addEventListener('click', function(){
+       alert('document click');
+     }, false);
+
+    </script>
+  </body>
+</html>

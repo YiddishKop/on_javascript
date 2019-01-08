@@ -1,0 +1,79 @@
+#+TITLE: JS lec-3
+
+JS 支持的数据类型:
+
+| 原始数据类型 | 复合数据类型 | 特殊数据类型 |
+|--------------+--------------+--------------|
+|              |              |              |
+
+
+** 原始数据类型
+*** 数值型
+1) 十进制
+2) 十六 0x4;
+3) 八进制 00; 0123;
+4) 特殊值: ~Infinity~ 无穷大;
+5) 特殊值: ~NaN~ 当一个Undefined表达式结果为数值型数据时(eg, ~0/0~), 该数值就
+      是NaN值. ~NaN~ 是唯一一个不能和自身作比较的值. 可以通过 ~isNaN()~ 来检测是
+      否是 NaN;
+
+#+NAME: 检测 NaN
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+  <body>
+  <script type="text/javascript">
+    d=0/0;
+    alert(d); // 'NaN'
+    alert(isNaN(d)); // 'true'
+  </script>
+  </body>
+#+END_SRC
+
+
+
+-----------------
+*** 字符串型
+
+1. 定界符: 单引号 or 双引号;
+2. 转义字符:
+
+#+BEGIN_EXAMPLE
+1. \n 回车换行
+2. \r 换行
+3. \t 水平制表;
+4. \' 单引号;
+5. \" 双引号;
+6. \\ 反斜杠
+#+END_EXAMPLE
+
+
+*** 布尔类型
+
+true / false
+
+
+** 复合数据类型
+*** 对象类型
+*** 数组类型
+*** 函数类型
+** 特殊数据类型
+*** 无定义数据类型 ~undefined~
+~undefined~ 表示不存在的or尚未赋值的 *变量*, 对一个变量 *只声明不赋值*, 都会使得
+该变量的值为 undefined. 通过 ~String.NotExists~ 也可以声明一个 ~undefined~ 类型.
+*** 空值 ~null~
+~null~ 表示空值, 表示什么都没有, 相当于一个占位符. null 和 undefined 的区别就是
+~Undefined~ 表示变量 *未赋值*, 而 ~null~ 表示变量被 *赋予了一个空值*.
+
+#+NAME: null 与 undefined
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+  <body>
+    <script type = "text/javascript">
+      var f;
+      alert(f);
+
+      var n=null;
+      alert(n == f); // true;值比较
+      alert(n === f); // false;类型比较
+    </script>
+
+  </body>
+#+END_SRC

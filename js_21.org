@@ -1,0 +1,192 @@
+#+TITLE: JS lec-21
+
+* 属性的特性
+
+下面总结的是 ~configurable~ 与 ~writable~ 相互搭配所产生的效果, 这两个是最重要的
+属性控制器.
+
+- C: configurable;
+- W: writable;
+- t: true
+- f: false
+- R: right
+- W: wrong
+
+|----------------------------------------+----------+--------------------------+----------+----------|
+|                                        | C:t; W:t | C:t; W:f                 | C:f; W:t | C:f; W:f |
+|----------------------------------------+----------+--------------------------+----------+----------|
+| attr value can modified                | R        | R(by ~defineProperty()~) | R        | W        |
+|----------------------------------------+----------+--------------------------+----------+----------|
+| modify attr value by assign value      | R        | W                        | R        | W        |
+|----------------------------------------+----------+--------------------------+----------+----------|
+| attr value can delete                  | R        | R                        | W        | W        |
+|----------------------------------------+----------+--------------------------+----------+----------|
+| getter or setter can modified          | R        | R                        | W        | W        |
+|----------------------------------------+----------+--------------------------+----------+----------|
+| features of attr can modified          | R        | R                        | W        | W        |
+| (only writable always can be modified) |          |                          |          |          |
+|----------------------------------------+----------+--------------------------+----------+----------|
+
+
+** 等价的操作
+
+
+
+#+NAME: 属性赋值的等价操作
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 如下两个操作是等价的 */
+  /* -------------------- */
+  /* 操作1: 创建对象,添加属性x, 属性值设置为1 */
+  var obj = {};
+  obj.x = 1;
+  /* 操作2: 创建对象的属性, value 特性设置为1, 其他三个特性设置为 true */
+  Object.defineProperty(obj, 'x', {
+    value:1,
+    writable:true,
+    enumerable:true,
+    configurable:true}); // {x: 1}
+
+
+
+  /* 如下两个操作是等价的 */
+  /* -------------------- */
+  /* 操作1: 创建对象的属性, value 特性设置为1, 其他三个特性设置为 true */
+  Object.defineProperty(obj, 'x', {value:1})
+  /* 操作2: 创建对象的属性, value 特性设置为1, 其他三个特性设置为 true */
+  Object.defineProperty(obj, 'x', {
+    value:1,
+    writable:false,
+    enumerable:false,
+    configurable:false}); // {x: 1}
+#+END_SRC
+
+
+如何冻结对象的原型(原型置空), 原型置空可以保证对象的每个属性都是自身的,而不是继
+承而来的.(父子绝交).
+
+#+NAME: 原型置空
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+
+#+END_SRC
+
+
+#+NAME: true configurable and false writable
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* writable 为 false, 通过赋值更改属性值是不生效的. */
+  Object.defineProperty(obj1, 'x', {
+      value:1,
+      writable:false,
+      enumerable: false,
+      configurable: true
+  }); // {value: 1, x: 1}
+
+  obj1.x = 2;
+  obj1 // {value: 1, x: 1}
+
+  /* configurable 为 true, 可以通过 defineProperty 配置 value. */
+  Object.defineProperty(obj1, 'x', {value:2}); // {value: 1, x: 2}
+  obj1 // {value: 1, x: 2}
+#+END_SRC
+
+
+#+NAME: writable 可以随便修改, 即便 configurable 为 false
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  Object.defineProperty(obj1, 'x', {
+      value:1,
+      writable:false,
+      enumerable: false,
+      configurable: false
+  }); // {value: 1, x: 1}
+
+  Object.defineProperty(obj1, 'x', {
+      value:1,
+      writable:true
+  }); // {value: 1, x: 1}
+
+#+END_SRC
+
+
+** 对象字面量中的属性 getter and setter
+
+- ~get attrName(){return xxx};~ 带有 return
+- ~set attrName(value){};~ 不带 return
+
+#+NAME: getter and setter
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var person={
+      username:'king',
+      sex:'男',
+
+      /* 当以 [对象.属性] 的形式读取属性值时调用
+         eg. person.age;
+         就会触发该函数的执行,相当于
+         person.getage();
+         会返回12.
+      ,*/
+      get age() { // 当以
+          return return 12;
+      },
+
+      /* 当以 [对象.属性=属性值] 的形式给属性赋值时调用
+         eg. person.age=13;
+         就会触发该函数的执行,相当于
+         person.setage(13);
+         会执行终端打印语句 '不能设置13'
+       ,*/
+      set age(value) {
+          console.log('不能设置' + value);
+      }
+  };
+
+  console.log(person.username);
+  console.log(person.age);
+  person.age=13;
+#+END_SRC
+
+
+同时你也可以直接在对象字面量定义中的属性的 setter 和 getter 方法中, 使用已经在对
+象字面量中定义的其他的属性值. eg:
+
+#+NAME: setter/getter中直接使用其他属性值
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var circle ={
+      radius: 13,
+      get circu(){return this.radius * 3.14 * 2},
+      get area(){return this.radius * this.radius * 3.14},
+      set multiplyRadius(value) {
+          this.radius *= value;
+      }
+  }
+
+  circle.area // 530.66
+
+  circle.radius // 13
+
+  circle.multiplyRadius(2) // WRONG! setter 不是这么调用的
+  // VM9592:1 Uncaught TypeError: circle.multiplyRadius is not a function
+
+  circle.multiplyRadius = 3 // RIGHT! 这才是 setter 的正确打开方式
+
+  circle.radius // 39
+#+END_SRC
+
+** defineProperty中的 getter
+
+与上面的不同, 上面的 getter 和 setter 都是在 *创建对象* 的过程中, 目的是用 *相同
+的属性取值和赋值语法* 来实现一些计算功能. 而这里要说的 getter 是在 *对象创建完毕,属
+性定义* 的过程中. 而且
+1. 对象字面量的getter和setter *不带冒号和function关键字* ~set/get attrName(){}~,
+2. ~defineProperty~ 的 getter *带冒号和function关键字*, ~get : function(){}~
+
+两者的相同点是: *都是针对单个属性的*
+
+#+NAME: defineProperty中的getter方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var obj1={};
+
+  Object.defineProperty(obj1, 'x', {
+      get : function(){return 123;}
+  })
+
+  obj1.x // 123
+#+END_SRC

@@ -1,0 +1,206 @@
+#+TITLE: JS lec-17
+
+* 对象属性相关操作
+
+属性
+
+数据属性
+
+访问属性
+
+三个相关的独享特性(Object attribute)
+
+
+** 访问属性
+
+1. ~对象名.属性名~
+2. ~对象名[属性名]~
+
+[注意]: 为什么需要方括号的形式: 如果属性不确定需要使用 '[]'
+
+
+#+NAME: 对象字面量的属性访问
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 对象字面量定义 */
+  var person = {
+      username:'king',
+      age:12,
+      salary:12345,
+      addr:'北京',
+      sex:'男'
+  };
+
+  person.addr // "北京"
+  person.age  // 12
+  person["addr"] // "北京"
+  person["age"]  // 12
+
+  /*为什么需要方括号的形式: 如果属性不确定需要使用 '[]' */
+  var attrName = 'username';
+  person.attrName // undefined
+  person[attrName] // "king"
+#+END_SRC
+
+#+NAME: 构造函数创建的对象的属性访问
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 构造函数创建对象 */
+
+  function personInfo(name,age,sex){
+      this.name = name;
+      this.age = age;
+      this.sex = sex;
+  }
+  /* 对象创建 */
+  var person1 = new personInfo("yuanlong", 31, "male");
+  person1["name"] //"yuanlong"
+  person1.name //"yuanlong"
+#+END_SRC
+
+
+** 属性添加
+
+属性添加只是比属性访问多了一个 *赋值* 操作而已.
+
+#+NAME: 属性添加
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 构造对象字面量 */
+  var obj={};
+
+  /* 添加属性并赋值 */
+  obj.username='king';
+  obj.age=12;
+  obj.addr='北京';
+
+  /* 访问属性 */
+  obj.username; // "king"
+  obj.age; // 12
+#+END_SRC
+
+
+** 属性修改
+
+属性修改的操作与属性添加完全一样,只是对原有属性值的 *覆盖*
+
+#+NAME: 属性修改
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 构造对象字面量 */
+  var obj={};
+
+  /* 添加属性并赋值 */
+  obj.username='king';
+  obj.age=12;
+  obj.addr='北京';
+
+  /* 属性修改 */
+  obj.username='long';
+
+  /* 访问属性 */
+  obj.username; // "long"
+  obj.age; // 12
+#+END_SRC
+
+
+** 属性删除
+
+#+NAME: 属性删除
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 构造对象字面量 */
+  var obj={};
+
+  /* 添加属性并赋值 */
+  obj.username='king';
+  obj.age=12;
+  obj.addr='北京';
+
+  /* 属性删除 */
+  delete obj.username //true
+
+  obj.username //undefined
+#+END_SRC
+
+[注意]:
+1. delete 只能删除自身属性, 不能删除继承属性;
+2. 继承属性只能在定义他的原型对象上删除, 这会对后继有影响, 应谨慎应对.
+3. delete 只是断开属性和宿主对象的联系
+4. delete 不能删除那些可配置性为 false 的属性
+
+
+** 属性遍历
+
+通过 ~for in~ 遍历属性
+
+#+NAME: 通过for-in遍历属性
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var obj = {
+      x:1,
+      y:2,
+      test:'this is a test',
+      edu: 'suning'
+  }
+
+  for( var p in obj){
+      console.log(p +'\n')
+  }
+
+  /*
+  VM4807:2 x
+
+  VM4807:2 y
+
+  VM4807:2 test
+
+  VM4807:2 edu
+  */
+#+END_SRC
+
+
+** 对象方法定义
+
+#+BEGIN_QUOTE
+JS 确实有意思, 对象并不具有封装性:
+1. 可以脱离类进行定义,更像是一种复杂的变量 (complex variable)
+2. 不具有封装性,随时可以增删改查其中的属性值 (modifable), 操作形同字典数据结构.
+3. 唯一不同于字典的地方是可以在其中定义函数, 不过考虑到 JS 中函数也是属性,这就不足为奇了.
+
+总结: 对象在 JS 中就是字典, 只不过 JS 提供了额外的类似OO的定义方式.
+#+END_QUOTE
+
+#+NAME: 对象中的方法的定义
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  /* 对象字面量 */
+  var obj2 = {
+      x:1,
+      y:2,
+      sayHi: function(){ // 定义对象的方法
+          console.log("say,hi");
+      }
+  }
+
+  obj2.sayHi() // 对象的方法的访问, 打印 "say,hi"
+#+END_SRC
+
+
+** 对象方法访问
+
+语法为: ~对象名.方法名()~
+
+如果使用 ~对象名.方法名~, 不带括号的话, *将以字符串的形式直接返回该函数的定义*
+
+#+NAME: 返回函数定义
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var obj2 = {
+      x:1,
+      y:2,
+      sayHi: function(){
+          console.log("say,hi");
+      }
+  }
+
+  obj2.sayHi
+  /* 会返回如下字符串 */
+  /*
+  ƒ (){
+          console.log("say,hi");
+      }
+  ,*/
+#+END_SRC

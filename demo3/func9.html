@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript" src="EventUtil.js"></script>
+  </head>
+  <body>
+    <h1>事件</h1>
+    <div id='box1' style='background: #ABCDEF; width: 300px; height:300px;'>
+      <input type="button" name="" value="test1" id='btn1' />
+      <input type="button" name="" value="test2" id='btn2' />
+    </div>
+    <script type="text/javascript">
+     // button 1
+     var btn1 = document.getElementById('btn1');
+     function test1(){
+       alert('hello king');
+     }
+     EventUtil.addHandler(btn1, 'click', test1);
+
+     // button 2, 注意这个事件处理程序的逻辑:
+     // 我们是给 button2 添加一个 'click' 事件
+     // 的事件监听器, 使得他被触发时执行删除
+     // button1 的事件监听器.
+     var btn2 = document.getElementById('btn2');
+     function test2(){
+       EventUtil.removeHandler(btn1, 'click', test1);
+     }
+     EventUtil.addHandler(btn2, 'click', test2);
+    </script>
+  </body>
+</html>

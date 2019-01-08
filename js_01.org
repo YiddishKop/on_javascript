@@ -1,0 +1,140 @@
+#+title: JS lec-1
+
+#+NAME: js三种编写方式
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script type="text/javascript">
+     alert("麦子学院JS开始了");
+    <!-- 书写js脚本方式1: 通过script标签 -->
+    </script>
+    <!-- 注意script标签内不能内嵌其他script标签 -->
+    <!-- 书写js脚本方式2: 通过script src= '目标js的URL' 外部的 js 文件 -->
+    <script src="script/js/test1.js"> </script>
+    <!-- 书写js脚本方式3: 作为某个元素的事件属性值或者是超链接的href属性值-->
+    <a href="javascript:confirm('您确认要学习js课程吗')">报名</a>
+    <p onclick="javascript:alert('hello world')">clickMe</p>
+  </body>
+</html>
+#+END_SRC
+
+----------
+按照在 html 文件中出现的顺序依次执行, 如果需要在HTML文件中执行函数或者全局变量,
+最好将其放在 HTML 的头部中.
+
+#+NAME: js全局函数放在 head
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <title></title>
+      <script>
+        // 全局函数
+        // 全局变量
+        // 引入某些文件
+      </script>
+    </head>
+    <body>
+      <script type="text/javascript">
+       alert("麦子学院JS开始了");
+      </script>
+      <script src="script/js/test1.js"> </script>
+      <a href="javascript:confirm('您确认要学习js课程吗')">报名</a>
+      <p onclick="javascript:alert('hello world')">clickMe</p>
+    </body>
+  </html>
+#+END_SRC
+
+
+------------
+js 严格区分大小写;
+
+------------
+
+js 默认忽略空白符和换行符, js会忽略关键字,变量名,数字,函数名或其他各种元素之间的
+空格/制表符/换行符,我们可以使用缩进/换行来使代码整齐,提高可读性.
+
+
+------------
+1. js 使用 ';' 结束语句.
+2. 如果不加 ';' 则默认每行末尾加 ';'
+3. 可以使用 '{}' 括成一个语句组,形成一个块 block
+
+
+------------
+通过 '\' 对代码进行折行操作:
+
+#+NAME: 折行操作
+#+BEGIN_SRC js :tangle yes :noweb yes :exports code :results output drawer
+document.write('hello\
+world');
+#+END_SRC
+
+------------
+注释: 类似 java
+#+BEGIN_EXAMPLE
+单行注释 //; 多行注释 /**/
+#+END_EXAMPLE
+
+------------
+- 通过 document.write() 向文档书写内容;
+- 通过 console.log() 向控制台写入内容;
+
+------------
+js 中的错误:
+- 通过 console 进行调试;
+- 通过 alert() 进行调试;
+------------
+
+#+NAME: 所有代码展示
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <title></title>
+    </head>
+    <body>
+      <script type="text/javascript">
+       alert("麦子学院JS开始了");
+      <!-- 书写js脚本方式1: 通过script标签 -->
+      </script>
+      <!-- 注意script标签内不能内嵌其他script标签 -->
+      <!-- 书写js脚本方式2: 通过script src= '目标js的URL' 外部的 js 文件 -->
+      <script src="script/js/test1.js"> </script>
+      <!-- 书写js脚本方式3: 作为某个元素的事件属性值或者是超链接的href属性值-->
+      <a href="javascript:confirm('您确认要学习js课程吗')">报名</a>
+      <p onclick="javascript:alert('hello world')">clickMe</p>
+      <script type="text/javascript">
+        // 如下报错
+        // document.write('aaa') document.write('bbb')
+      </script>
+
+      <!-- //-->
+      <!--
+         代码屏蔽:
+         上面这个标记很有意思,适合不支持 js 的浏览器使用.
+      -->
+
+      <script type="text/javascript">
+       // 尽量使用换行符
+       document.write('aaa');
+       document.write('<br/>'); // 换行
+       document.write('bbb');
+      </script>
+
+      <script type="text/javascript">
+       // 如何向控制台输入内容
+       console.log('向控制台中输入内容!')
+       // 'console.log' 也可以直接在 chrome 中书写
+      </script>
+
+    </body>
+  </html>
+#+END_SRC

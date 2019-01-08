@@ -1,0 +1,320 @@
+#+TITLE: JS lec-27
+
+html 规定文档结构, css 美化页面外观, JS 可以通过事件制作交互式网页.
+
+* 事件相关概念
+定义
+
+指的是文档或者浏览器窗口中发生的一些特定交互瞬间. 我们可以通过侦听器(或处理程序)
+来预定事件, 以便事件发生时执行相应代码. 鼠标事件, 键盘事件, 窗口事件...
+
+| 事件类型(event type)                                    | 事件类型是一个用来说明发生什么类型事件的字符串. 像鼠标悬浮, 按下键盘等. 我们也可以把事件类型叫做事件名字, 用特定的名字来标识所谈论的特定类型的事件.                                                                                                   |
+| 事件目标(event target)                                  | 事件目标是发生的事件或与之相关的对象. 当讲事件时, 我们必须同时指定类型和目标. 像 windows 上的 load 事件或者链接的 click 事件. 在客户端 JS 的应用程序中, Window, Document, 和 Element 对象是最常见的事件目标, 但是某些事件也是有其他类型的事件触 发的. |
+| 事件处理程序(event handler)或事件监听器(event listener) | 我们用户在页面中进行的点击这个动作,鼠标移动的动作,网页页面加载完成的动作等, 都可 以称之为事件名称. 即:click, mousemove, load 等都是事件的名称. 响应某个事件的函数 则称为事件处理程序, 或者叫做事件侦听器.                                             |
+| 事件对象(event object)                                  | 事件对象是与特定事件相关且包含有关该事件详细信息的对象, 事件对象作为参数传递给事 件处理程序. 所有的事件对象都有用来指定事件类型的type属性和指定事件目标的target属 性. 每个事件类型都为其相关的事件对象定义一组属性.                                   |
+| 事件传播(event propagration)                            | 事件传播是浏览器决定哪个对象触发其他事件处理程序的过程. eg. 超链接在<div>里,超链 接有事件,<div>也有事件,点击超链接时,到底哪个事件先发生. 这就是事件传播.                                                                                              |
+
+* 事件模型
+
+** 内联模型
+
+这种模型是最传统和单一的一种处理事件的方法. 在内联模型中, 事件处理函数是 HTML 标
+签的一个属性, 用于处理指定事件. 虽然内联在早起使用较多, 但他是和 HTML 混写的,并
+没有与 HTML 分离.
+
+#+NAME: 内联事件
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <title></title>
+    </head>
+    <body>
+      <h1>事件</h1>
+      <!-- onclick 事件直接以标签属性的形式出现, 这是内联事件, 不易维护 -->
+      <input type="button" value="test1" onclick="alert('hello yuanlong')" />
+      <input type="button" name="" value="test2" onclick="test()" />
+      <script type="text/javascript">
+       function test(){
+         alert('this is a test');
+        }
+      </script>
+    </body>
+  </html>
+#+END_SRC
+
+** 脚本模型
+
+由于内联模型违反了 HTML 与 JavaScript 代码层次分离的原则. 为了解决这个问题, 我们
+可以在 JavaScript 中处理事件. 这种处理方式就是脚本模型.
+
+步骤:
+1. *声明* HTML 元素及其 id: ~<input type="button" id="btn4" />~
+2. 通过 ~document.getElementById(id)~ *获取* 该元素的对象: ~var btn4 =
+   document.getElementById('btn4');~
+3. 给该元素的某个事件名称 *赋值* 回调函数: ~btn4.onclick = function(){}~
+
+[弊端:] 毫无疑问, 脚本模型允许给某个事件名称 *赋值* 一个回调函数, 这种机制是无法
+完成某个事件绑定多个回调函数的.
+
+
+#+NAME: 脚本模型
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>事件</h1>
+    <input type="button" value="test1" onclick="alert('hello yuanlong')" />
+    <input type="button" name="" value="test2" onclick="test()" />
+    <input type="button" name="" value="test3" id="btn1" />
+    <input type="button" name="" value="test4" id="btn3" />
+    <input type="button" name="" value="test6" id="btn4" />
+
+    <script type="text/javascript">
+     var btn1 = document.getElementById('btn1'); // 通过 id 先找到这个元素
+     btn1.onclick=function(){                    // 然后给元素的 onclick 事件
+       alert('btn1 click');                      // 添加处理函数.
+     }
+     function test(){
+       alert('this is a test');
+     }
+
+     var bnt3=document.getElementById('btn3');
+     var count = 0;
+     btn3.onclick=function(){
+       alert(count++);
+       if(count==3){
+         btn3.onclick = null; // 相当于关闭该事件 --- 即鼠标点击无程序执行.
+       }
+     }
+
+     // 脚本模型事件的弊端: 如果我想给 btn4 添加多个事件
+     // 这种情况只会有最后一个 onclick 事件绑定函数执行. 前两个被覆盖.
+     // 所以多个事件处理程序绑在一个 HTML 元素上, 是无法实现的.
+     var btn4 = document.getElementById('btn4');
+     btn4.onclick = function(){
+       alert('a');
+     }   // 被覆盖
+     btn4.onclick = function(){
+       alert('b');
+     }   // 被覆盖
+     btn4.onclick = function(){
+       alert('c');
+     }   // 只有这个处理函数会被启用
+    </script>
+  </body>
+</html>
+
+#+END_SRC
+
+
+** DOM2模型
+
+"DOM2级事件"定义了两个方法, 用于添加事件和删除事件处理程序的操作;
+~addEventListener()~ 和 ~removeEventListener()~. 所有 DOM 节点中都包含这两个方法,
+并且他们都接受 3个参数: *事件名*, *函数*, *冒泡或捕获的布尔值(true表示捕获;
+false表示冒泡)*.
+
+#+BEGIN_QUOTE
+IE 事件处理程序, IE中实现了DOM中类似的两个方法: ~attachEvent()~ 和
+~detachEvent()~. 这两个方法受相关的两个参数: 事件处理程序名称和事件处理程序函数.
+在 IE8 及 IE8 之间版本中只支持事件冒泡, 所以通过 attachEvent() 添加的事件处理都
+会被添加到冒泡阶段.
+#+END_QUOTE
+
+
+*事件对象(Event):*
+
+| 常量 |
+| 属性 |
+| 方法 |
+
+#+NAME: 常量
+| 静态变量        | 描述                           |
+|-----------------+--------------------------------|
+| CAPTURING-PHASE | 当前事件阶段为捕获阶段         |
+| AT-TARGET       | 当前事件是目标阶段, 在评估事件 |
+| BUBBLING-PHASE  | 当前的事件为冒泡阶段           |
+
+
+
+*事件流:*
+
+事件流描述的是从页面中接受事件的顺序. 当几个都具有事件的元素层叠在一起的时候, 那
+么你点击其中一个元素, 并不是只有当前被点击的元素会触发事件, 而层叠在你点击范围的
+所有元素都会触发事件. 事件流包括两种形式: 冒泡和捕获.
+
+*事件冒泡*, 是 *从里往外逐个触发*. 事件捕获, 是从外往里逐个触发. 那么现代的浏览
+器默认情况下都是冒泡模型, 而捕获模式则是早起的 Netscape 默认情况. 而现在的浏览器
+要使用 DOM2 级模型的事件绑定机制才能手动定义事件流模式.
+
+#+NAME: 冒泡事件流
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>事件</h1>
+    <div id='box1' style='background: #ABCDEF; width: 300px; height:300px;'>
+      <input type="button" name="" value="test1" id='btn1' />
+    </div>
+    <script type="text/javascript">
+     var btn1 = document.getElementById('btn1');
+     var box1 = document.getElementById('box1');
+
+     btn1.onclick = function(){
+       alert('btn clicked');
+     }
+
+     box1.onclick = function(){
+       alert('div clicked');
+     }
+
+     document.body.onclick= function(){
+       alert('bodyclicked');
+     }
+
+     document.documentElement.onclick= function(){
+       alert('htmlclicked');
+     }
+
+     document.onclick= function(){
+       alert('document clicked');
+     }
+
+    </script>
+  </body>
+</html>
+#+END_SRC
+
+#+NAME: 如何停止事件传播
+#+BEGIN_SRC html :tangle yes :noweb yes :exports code :results output drawer
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <title></title>
+    </head>
+    <body>
+      <h1>事件</h1>
+      <div id='box1' style='background: #ABCDEF; width: 300px; height:300px;'>
+        <input type="button" name="" value="test1" id='btn1' />
+      </div>
+      <script type="text/javascript">
+       var btn1 = document.getElementById('btn1');
+       var box1 = document.getElementById('box1');
+
+       btn1.onclick = function(){
+         alert('btn clicked');
+
+         // 取消冒泡
+         var e = e||window.event;
+
+         // w3c取消冒泡
+         /* e.stopPropagation(); */
+
+         // IE 取消冒泡
+         /* e.cancelBubble=true */
+
+         if(typeof e.cancelBubble=='undefined'){  // 浏览器兼容处理, 如果这个变量
+                                                  // 没定义说明其为 w3c 标准, 则通
+                                                  // 过 stopPropagation() 停止传播;
+                                                  // 如果这个变量定义了, 说明其为
+                                                  // IE 标准, 通过 cancelBubble()
+                                                  // 停止传播
+           e.stopPropagration();
+         }else{
+           e.cancelBubble = true;
+         }
+       }
+
+       box1.onclick = function(){
+         alert('div clicked');
+       }
+
+       document.body.onclick= function(){
+         alert('bodyclicked');
+       }
+
+       document.documentElement.onclick= function(){
+         alert('htmlclicked');
+       }
+
+       document.onclick= function(){
+         alert('document clicked');
+       }
+
+      </script>
+    </body>
+  </html>
+#+END_SRC
+
+#+NAME: 事件流示意图
+#+BEGIN_EXAMPLE
+----------------> 捕获顺序
+|----------+---------------+---------------+--------------+----------------+
+| Document | Document HTML | Document body | Document div | Document input |
+|----------+---------------+---------------+--------------+----------------+
+                                                   冒泡顺序  <--------------
+#+END_EXAMPLE
+
+#+NAME: 冒泡事件流示意图1
+#+BEGIN_EXAMPLE
+| onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...) |
+|--------------------+--------------------+--------------------+--------------------+--------------------|
+| Document           | Document HTML      | Document body      | Document div       | Document input     |
+|--------------------+--------------------+--------------------+--------------------+--------------------|
+      ^                         ^                     ^                   ^                   ^
+      |                         |                     |                   |                   |
+   ---+-------------------------+---------------------------------------------------------------------- 同时监听, 逐个执行
+      |                         |                     |                   |                   | \
+      弹                       弹                     弹                  弹                 弹  \-- click
+#+END_EXAMPLE
+
+#+NAME: 冒泡事件流示意图2
+#+BEGIN_EXAMPLE
+| onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...) |
+|--------------------+--------------------+--------------------+--------------------+--------------------|
+| Document           | Document HTML      | Document body      | Document div       | Document input     |
+|--------------------+--------------------+--------------------+--------------------+--------------------|
+      ^                         ^                     ^
+      |                         |                     |
+   ---+-----------------------------------------------------------------------同时监听, 逐个执行
+      |                         |                     |                   |  \
+      弹                       弹                     弹                  弹  \-- click
+#+END_EXAMPLE
+
+#+NAME: 冒泡事件流示意图3
+#+BEGIN_EXAMPLE
+| onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...) |
+|--------------------+--------------------+--------------------+--------------------+--------------------|
+| Document           | Document HTML      | Document body      | Document div       | Document input     |
+|--------------------+--------------------+--------------------+--------------------+--------------------|
+      ^                         ^                     ^
+      |                         |                     |
+   ---+---------------------------------------------------- 同时监听, 逐个执行
+      |                         |                     |  \
+      弹                       弹                     弹  \-- click
+#+END_EXAMPLE
+
+#+NAME: 冒泡事件流示意图4 截断事件流
+#+BEGIN_EXAMPLE
+| onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...) | onclick=alert(...)        |
+|                    |                    |                    |                    | /* e.stopPropagation(); */|
+|--------------------+--------------------+--------------------+--------------------+---------------------------|
+| Document           | Document HTML      | Document body      | Document div       | Document input            |
+|--------------------+--------------------+--------------------+--------------------+---------------------------|
+                                                                                                ^
+                                                                                                |
+                                                                                                +-------- 同时监听, 逐个执行
+                                                                                                | \
+                                                                                               弹  \-- click
+#+END_EXAMPLE

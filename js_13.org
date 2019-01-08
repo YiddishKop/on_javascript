@@ -1,0 +1,68 @@
+#+TITLE: JS lec-13
+
+* 全局函数
+
+1. ~parseInt(string, radix)~ 返回转换成整数的值(以 ~radix~ 为指定基数), 如果类似
+   ~parseInt('3king')~ 则 *仅仅返回合法部分*; 如果类似 ~parseInt('king')~ 没有合
+   法部分,则转换为 ~NaN~
+2. ~parseFloat(string)~ 返回转换成浮点数的值
+3. ~isFinite(value)~ 检测某个是否是无穷值
+4. ~isNaN(value)~ 检测某个值是否是NaN
+
+
+#+NAME:
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+parseInt('123123') // 123123
+parseInt('0x123123') // 1192227
+parseInt('0123123') // 123123
+parseFloat('1.6') // 1.6
+parseFloat('1.6sss') // 1.6
+isFinite(123) // true
+isFinite(+Infinity) // false
+isFinite(-Infinity) // false
+isFinite(0/0) // false
+#+END_SRC
+
+编码URI
+1. ~encodeURI()~ 把字符串编码为URI, ~/ ! ? &~ 这些符号保持不变,不会转换.
+2. ~decodeURI()~
+3. ~encodeURIComponent()~
+4. ~decodeURIComponent()~
+
+#+NAME: URI编码解码
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var url = 'http://www.phpfamily.org/test.php!search= this is a test'; //undefined
+  encodeURI(url)// "http://www.phpfamily.org/test.php!search=%20this%20is%20a%20test"
+  var res1 = encodeURI(url)// undefined
+  decodeURI(res1)// "http://www.phpfamily.org/test.php!search= this is a test"
+#+END_SRC
+
+编码字符串,使之跨平台:
+~windows ---> js_string_format.escape ---> 传递 ---> js_string_format.unescape ---> ubuntu~
+1. ~escape()~
+2. ~unescape()~
+
+将字符串当做脚本来执行:
+1. ~eval(string)~ : 比较危险,比较慢;
+
+#+NAME: eval函数
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  eval('var i = 12') //undefined
+#+END_SRC
+
+把对象值转换为数字, 如果无法转换就是返回 ~NaN~
+1. ~Number(obj) => number~
+
+#+NAME: Number方法
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+var str1 = new Boolean(123); //undefined
+alert(typeof str1); //undefined
+Number(str1); //1
+str1 //Boolean {true}__proto__: Boolean[[PrimitiveValue]]: true
+var var1 = new Date(); //undefined
+var1 //Mon Nov 12 2018 23:11:54 GMT+0800 (China Standard Time)
+var1 = Number(var1); //1542035514426
+#+END_SRC
+
+把对象转换为字符串:
+1. ~String(obj) => string~

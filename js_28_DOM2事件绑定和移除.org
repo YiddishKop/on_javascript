@@ -1,0 +1,54 @@
+#+TITLE: JS lec-28
+
+
+* 脚本机制 vs. DOM2机制
+
+区分几个单词, 将事半功倍的理解:
+
+| 英文          | 中文         | 举例                                                                                                         |
+|---------------+--------------+--------------------------------------------------------------------------------------------------------------|
+| element       | 元素         | HTML 中的子结构: div, body, 等                                                                               |
+| event         | 事件         | onclick                                                                                                      |
+| hanlder       | 事件处理函数 | 脚本机制下绑定事件处理函数的语法为: ~element.event = handler;~                                               |
+| eventListener | 事件监听器   | 用于把某个 element 的某个 event 与某个 handler 进行绑定: ~element.addEventListener('click', handler, false)~ |
+| eventStream   | 事件流       | 标识了层级嵌套的元素的某个事件发生, 触发各个层级的元素的事件处理函数的执行顺序                               |
+
+[注意:] DOM2 机制下的 w3c 浏览器中的元素的绑定事件监听器函数
+(addEventListener(event, handler, eventStream)) 的 ~event~ 格式为 ~'click'~ ; 在
+DOM2 机制下的 IE 浏览和脚本机制中是 'on' + 'click' = ~'onclick'~.
+
+
+| w3c 浏览器独有                       | IE 浏览器独有                | 两者共有(脚本机制)                          |
+|--------------------------------------+------------------------------+---------------------------------------------|
+| 元素包含属性方法 addEventListener    | 元素包含属性方法 attachEvent | 元素包含属性 'on' + eventType('click'..etc) |
+| 元素包含属性方法 removeEventListener | 元素包含属性方法 attachEvent | 元素包含属性 'on' + eventType('click'..etc) |
+
+有点类似如下的定义:
+
+#+NAME: 假想的元素定义
+#+BEGIN_SRC javascript :tangle yes :noweb yes :exports code :results output drawer
+  var div = {
+    addEventListener: function(event, handler, eventStream){...},     // w3c browser
+    removeEventListener: function(event, handler, eventStream){...},  // w3c browser
+    atachEvent: function(event, handler),                             // IE browser
+    detachEvent: function(event, handler),                            // IE browser
+    onclick: function(){...},
+    onmove: function(){...},
+    onmove: function(){...},
+  }
+#+END_SRC
+
+实际上, IE 和 w3c 的事件添加和事件删除函数, 都是对 'on'+type 脚本模型的事件处理
+器函数进行的封装. 以 ~addEventListener(event, handler, eventStream)~ 为例:
+
+#+BEGIN_EXAMPLE
+   element.addEventListener('click', handler, false);
+     |                        |         |
+     |        +---------------+         |
+     |        |         +---------------+
+     v        v         v
+   element.onclick = hanlder;
+#+END_EXAMPLE
+
+所以其实 DOM2 事件处理模型仅仅是脚本模型的 *一种封装* 而已, 可以很方便的在函数参
+数中提供 *事件的名字*, 并且可以方便的绑定 *多个* 事件处理函数.
